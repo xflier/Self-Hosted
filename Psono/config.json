@@ -1,0 +1,15 @@
+{
+  "backend_servers": [{
+    "title": "Psono.pw",
+    "url": "https://<psono domain in .env>/server"
+  }],
+  "base_url": "https://<psono domain in .env>/",
+  "allow_custom_server": true,
+  "allow_registration": true,
+  "allow_lost_password": true,
+  "disable_download_bar": false,
+  "remember_me_default": false,
+  "trust_device_default": false,
+  "authentication_methods": ["AUTHKEY", "LDAP"],
+  "saml_provider": []
+}

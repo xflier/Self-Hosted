@@ -1,0 +1,27 @@
+services:
+  psono:
+    image: ${PSONO_IMAGE:?Variable is not net}
+    container_name: psono
+    restart: unless-stopped
+    sysctls:
+      # net.core.somaxconn: '65535'
+      net.core.somaxconn: '16'
+    # ports:
+    #  - "28080:80"
+    # environment:
+    #   - PSONO_ALLOW_EXPORT="True"
+    #   - PSONO_ALLOW_IMPORT="True"
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not net}/psono/config.json:/usr/share/nginx/html/config.json
+      - ${BASE_STORAGE_DIR:?Variable is not net}/psono/config.json:/usr/share/nginx/html/portal/config.json
+      - ${BASE_STORAGE_DIR:?Variable is not net}/psono/settings.yaml:/root/.psono_server/settings.yaml
+    depends_on:
+      - postgres
+    networks:
+      - docker_net
+    labels:
+      caddy: ${SERVER_PROTOCOL:?Variable is not net}://${PSONO_SERVER_HOSTNAME:?Variable is not net}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+networks:
+  docker_net:
+    external: true

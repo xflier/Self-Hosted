@@ -1,0 +1,4 @@
+/blk/seafile/seafile/conf/seafdav.conf update the follow content from false to true
+
+[WEBDAV]
+enabled = true

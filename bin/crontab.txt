@@ -1,0 +1,2 @@
+30 3 * * * /usr/bin/docker exec psono python3 ./psono/manage.py cleartoken > /tmp/cron.log
+30 3 * * * docker exec seafile sh -c 'exec /opt/seafile/seafile-server-latest/seaf-gc.sh --rm-fs >> /tmp/seaf-gc.log'

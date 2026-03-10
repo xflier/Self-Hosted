@@ -1,0 +1,31 @@
+services:
+  mariadb:
+    image: ${MARIA_DB_IMAGE:?Variable is not set}
+    container_name: mariadb
+    # user: 1000:1000
+    environment:
+      - MARIADB_ROOT_PASSWORD=${INIT_MARIA_ROOT_PASSWORD:?Variable is not set}
+      - MYSQL_LOG_CONSOLE=true
+      - MARIADB_AUTO_UPGRADE=1
+    volumes:
+      - "${BASE_STORAGE_DIR:-/blk}/mariadb/db:/var/lib/mysql"
+    networks:
+      - docker_net
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/usr/local/bin/healthcheck.sh",
+          "--connect",
+          "--mariadbupgrade",
+          "--innodb_initialized",
+        ]
+      interval: 20s
+      start_period: 30s
+      timeout: 5s
+      retries: 10
+
+networks:
+  docker_net:
+    external: true

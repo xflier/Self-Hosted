@@ -1,0 +1,25 @@
+services:
+  vaultwarden:
+    image: ${VAULT_WARDEN_IMAGE:?Variable is not set}
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${SERVER_PROTOCOL:?Variable is not set}://${VAULT_WARDEN_SERVER_HOSTNAME:?Variable is not set}
+      SIGNUPS_ALLOWED: "true" # Deactivate this with "false" after you have created your account so that no strangers can register
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/vault_warden:/data # the path before the : can be changed
+    # ports:
+    # - 11001:80
+    labels:
+      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${VAULT_WARDEN_SERVER_HOSTNAME:?Variable is not set}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - docker_net
+networks:
+  docker_net:
+    external: true

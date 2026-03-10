@@ -1,0 +1,20 @@
+services:
+  caddy:
+    image: ${SEAFILE_CADDY_IMAGE:?Variable is not set}
+    restart: unless-stopped
+    container_name: caddy-proxy
+    ports:
+      - 80:80
+      - 443:443/tcp
+      - 443:443/udp
+    environment:
+      - CADDY_INGRESS_NETWORKS=docker_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${BASE_STORAGE_DIR:-/blk}/caddy-proxy:/data/caddy
+    networks:
+      - docker_net
+
+networks:
+  docker_net:
+    external: true

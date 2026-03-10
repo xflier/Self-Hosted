@@ -1,0 +1,12 @@
+services:
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    # restart: unless-stopped
+    ports:
+      - 18080:8080
+    networks:
+      - docker_net
+networks:
+  docker_net:
+    external: true

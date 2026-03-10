@@ -1,0 +1,154 @@
+# Replace the keys below with the one from the generateserverkeys command.
+SECRET_KEY: '<SECRET KEY generated>'
+ACTIVATION_LINK_SECRET: '<Generated>'
+DB_SECRET: '<SECRET generate>'
+EMAIL_SECRET_SALT: '<generated>'
+PRIVATE_KEY: '<generated>'
+PUBLIC_KEY: '<generated>'
+
+# The URL of the web client (path to e.g activate.html without the trailing slash)
+WEB_CLIENT_URL: 'https://<psono domain in .env>'
+
+# The number of proxies in your environment to parse the X-Forwarded-For header. The basic setup of Psono uses 2
+# reverse proxies, the regular one and one in the combo container. If you have additional Loadbalancers you may have
+# adjust this parameter.
+NUM_PROXIES: 2
+
+# The URL of the favicon service. You can
+# a) host an own favicon server
+# b) use a privacy friendly https://favicon.psono.com/v1/icon/
+# c) use any other provider, e.g. google's https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&size=128&url=http://
+# WARNING: The "first url filter" (e.g. domain or IP) configured for an entry will be sent to the service.
+#
+FAVICON_SERVICE_URL: 'https://favicon.psono.com/v1/icon/'
+
+# Switch DEBUG to false if you go into production
+DEBUG: False
+
+# Adjust this according to Django Documentation https://docs.djangoproject.com/en/2.2/ref/settings/
+ALLOWED_HOSTS: ['*']
+
+# Should be your domain without "www.". Will be the last part of the username
+ALLOWED_DOMAINS: ['<psono domain in .env>']
+
+# If you want to disable registration, you can comment in the following line
+# ALLOW_REGISTRATION: False
+
+# If you want to disable the lost password functionality, you can comment in the following line
+# ALLOW_LOST_PASSWORD: False
+
+# If you want to enforce that the email address and username needs to match upon registration
+# ENFORCE_MATCHING_USERNAME_AND_EMAIL: False
+
+# If you want to restrict registration to some email addresses you can specify here a list of domains to filter
+# REGISTRATION_EMAIL_FILTER: ['company1.com', 'company2.com']
+
+# Should be the URL of the host under which the host is reachable
+# If you open the url and append /info/ to it you should have a text similar to {"info":"{\"version\": \"....}
+HOST_URL: 'https://<psono domain in .env>/server'
+
+# The email used to send emails, e.g. for activation
+# ATTENTION: If executed in a docker container, then "localhost" will resolve to the docker container, so
+# "localhost" will not work as host. Use the public IP or DNS record of the server.
+EMAIL_FROM: 'example@yahoo.com'
+EMAIL_HOST: 'smtp.mail.yahoo.com'
+EMAIL_HOST_USER: 'example@yahoo.com'
+EMAIL_HOST_PASSWORD : '<encrpted password>'
+EMAIL_PORT: 587
+EMAIL_SUBJECT_PREFIX: ''
+EMAIL_USE_TLS: True
+EMAIL_USE_SSL: False
+EMAIL_SSL_CERTFILE:
+EMAIL_SSL_KEYFILE:
+EMAIL_TIMEOUT: 10
+
+# If you have your own Yubico servers, you can specify here the urls as a list
+# YUBICO_API_URLS: ['https://api.yubico.com/wsapi/2.0/verify']
+
+# Cache enabled without belows Redis may lead to unexpected behaviour
+
+# Cache with Redis
+# By default you should use something different than database 0 or 1, e.g. 13 (default max is 16, can be configured in
+# redis.conf) possible URLS are:
+#    redis://[:password]@localhost:6379/0
+#    rediss://[:password]@localhost:6379/0
+#    unix://[:password]@/path/to/socket.sock?db=0
+# CACHE_ENABLE: False
+# CACHE_REDIS: False
+# CACHE_REDIS_LOCATION: 'redis://127.0.0.1:6379/13'
+
+# Enables the management API, required for the psono-admin-client / admin portal (Default is set to False)
+# MANAGEMENT_ENABLED: True
+
+# Enables the fileserver API, required for the psono-fileserver
+# FILESERVER_HANDLER_ENABLED: False
+
+# Enables files for the client
+# FILES_ENABLED: False
+
+# Allows that users can search for partial usernames
+# ALLOW_USER_SEARCH_BY_USERNAME_PARTIAL: True
+
+# Allows that users can search for email addresses too
+# ALLOW_USER_SEARCH_BY_EMAIL: True
+
+# Disables central security reports
+DISABLE_CENTRAL_SECURITY_REPORTS: True
+
+# Configures a system wide DUO connection for all clients
+# DUO_INTEGRATION_KEY: ''
+# DUO_SECRET_KEY: ''
+# DUO_API_HOSTNAME: ''
+
+# If you are using the DUO proxy, you can configure here the necessary HTTP proxy
+# DUO_PROXY_HOST: 'the-ip-or-dns-name-goes-here'
+# DUO_PROXY_PORT: 80
+# DUO_PROXY_TYPE: 'CONNECT'
+# If your proxy requires specific headers you can also configure these here
+# DUO_PROXY_HEADERS: ''
+
+# Normally only one of the configured second factors needs to be solved. Setting this to True forces the client to solve all
+# MULTIFACTOR_ENABLED: True
+
+# Allows admins to limit the offered second factors in the client
+# ALLOWED_SECOND_FACTORS: ['yubikey_otp', 'google_authenticator', 'duo', 'webauthn', 'ivalt']
+
+# In case one wants to use iVALT, please add ivalt_secret_key. If you don't have then please write to ivat at 'support@ivalt.com'.
+# IVALT_SECRET_KEY: ''
+
+# Your Postgres Database credentials
+# ATTENTION: If executed in a docker container, then "localhost" will resolve to the docker container, so
+# "localhost" will not work as host. Use the public IP or DNS record of the server.
+DATABASES:
+    default:
+        'ENGINE': 'django.db.backends.postgresql_psycopg2'
+        'NAME': '<psono db name in .env>'
+        'USER': '<psono user login in .env>'
+        'PASSWORD': '<psono user password in .env>'
+        'HOST': '<psono db name in .env>'
+        'PORT': '5432'
+# for master / slave replication setup comment in the following (all reads will be redirected to the slave
+#    slave:
+#        'ENGINE': 'django.db.backends.postgresql_psycopg2'
+#        'NAME': 'YourPostgresDatabase'
+#        'USER': 'YourPostgresUser'
+#        'PASSWORD': 'YourPostgresPassword'
+#        'HOST': 'YourPostgresHost'
+#        'PORT': 'YourPostgresPort'
+
+# The path to the template folder can be "shadowed" if required later
+TEMPLATES: [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['/root/psono/templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
