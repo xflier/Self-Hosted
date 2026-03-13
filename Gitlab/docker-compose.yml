@@ -1,0 +1,33 @@
+services:
+  gitlab:
+    image: ${GITLAB_IMAGE:?Variable is not set}
+    container_name: gitlab
+    environment:
+      GITLAB_ROOT_EMAIL: ${ROOT_EMAIL:?Variable is not set} # User email
+      GITLAB_ROOT_PASSWORD: ${ROOT_PASSWD:?Variable is not set} # User password (at least 12 characters)
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url  "${GITLAB_URL:?Variable is not set}"
+        nginx['listen_port'] = 8000
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+    ports:
+      - "${GITLAB_PORT}:8000" # Web UI
+      - "2222:22" # SSH (Host 2222 → Container 22)
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/gitlab/config:/etc/gitlab
+      - ${BASE_STORAGE_DIR:?Variable is not set}/gitlab/data:/var/opt/gitlab
+    networks:
+      - docker_net
+
+  gitlab-runner:
+    image: ${GITLAB_RUNNER_IMAGE:?Variable is not set}
+    container_name: gitlab-runner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${BASE_STORAGE_DIR}/gitlab/runner-config:/etc/gitlab-runner
+    networks:
+      - docker_net
+
+networks:
+  docker_net:
+    external: true
+
