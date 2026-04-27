@@ -1,0 +1,70 @@
+services:
+  collaboration:
+    image: ${OCIS_IMAGE:?Variable is not set}
+    container_name: collaboration
+    networks:
+      - docker_net
+    depends_on:
+      ocis:
+        condition: service_started
+      collabora:
+        condition: service_healthy
+    command: ["collaboration", "server"]
+    environment:
+      COLLABORATION_GRPC_ADDR: 0.0.0.0:9301
+      COLLABORATION_HTTP_ADDR: 0.0.0.0:9300
+      MICRO_REGISTRY: "nats-js-kv"
+      MICRO_REGISTRY_ADDRESS: "ocis:9233"
+      COLLABORATION_WOPI_SRC: http://collaboration:9300
+      COLLABORATION_APP_NAME: "CollaboraOnline"
+      COLLABORATION_APP_PRODUCT: "Collabora"
+      COLLABORATION_APP_ADDR: ${SERVER_PROTOCOL:?Variable is not set}://${COLLABORA_SERVER_HOSTNAME:?Variable is not set}
+      COLLABORATION_APP_ICON: ${SERVER_PROTOCOL:?Variable is not set}://${COLLABORA_SERVER_HOSTNAME:?Variable is not set}/favicon.ico
+      COLLABORATION_APP_INSECURE: "true"
+      COLLABORATION_CS3API_DATAGATEWAY_INSECURE: "true"
+      COLLABORATION_LOG_LEVEL: info
+      OCIS_URL: ${SERVER_PROTOCOL:?Variable is not set}://${OCIS_SERVER_HOSTNAME:?Variable is not set}
+      OCIS_JWT_SECRET: ${JWT_PRIVATE_KEY:?Variable is not set}
+      COLLABORATION_WOPI_SECRET: ${JWT_PRIVATE_KEY:?Variable is not set}
+      COLLABORATION_JWT_SECRET: "${JWT_PRIVATE_KEY:?Variable is not set}"
+    extra_hosts:
+      - "${OCIS_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
+      - "${COLLABORA_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "3"
+    restart: unless-stopped
+
+  collabora:
+    image: ${COLLABORA_IMAGE:?Variable is not set}
+    container_name: collabora
+    networks:
+      - docker_net
+    environment:
+      DONT_GEN_SSL_CERT: "YES"
+      # extra_params: |
+      #   --o:ssl.enable=false \
+      #   --o:ssl.ssl_verification=false \
+      #   --o:ssl.termination=true \
+      #   --o:welcome.enable=false \
+      #   --o:net.frame_ancestors=${OCIS_SERVER_HOSTNAME:?Variable is not set}
+      extra_params: "--o:ssl.enable=false --o:ssl.termination=true --o:ssl.ssl_verification=false --o:welcome.enable=false --o:net.frame_ancestors=${OCIS_SERVER_HOSTNAME:?Variable is not set}"
+      username: ${COLLABORA_ADMIN_USER:?Variable is not set}
+      password: ${COLLABORA_ADMIN_PASSWORD:?Variable is not set}
+    cap_add:
+      - MKNOD
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "3"
+    restart: unless-stopped
+    entrypoint: ['/bin/bash', '-c']
+    command: ['coolconfig generate-proof-key && /start-collabora-online.sh']
+    labels:
+      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${COLLABORA_SERVER_HOSTNAME:?Variable is not set}
+      caddy.reverse_proxy: "{{upstreams 9980}}"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9980 && echo -e 'GET /hosting/discovery HTTP/1.1\r\nHost: localhost:9980\r\n\r\n' >&3 && head -n 1 <&3 | grep '200 OK'"]

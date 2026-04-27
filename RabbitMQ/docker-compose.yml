@@ -1,0 +1,20 @@
+services:
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE:?Variable is not set}
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      # - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:?Variable is not set}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:?Variable is not set}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:?Variable is not set}
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/rabbitmq:/var/lib/rabbitmq
+    networks:
+      - docker_net
+
+networks:
+  docker_net:
+    external: true

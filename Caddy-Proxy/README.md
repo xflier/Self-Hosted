@@ -1,12 +1,12 @@
 # Caddy Proxy Service
 
-Caddy is a modern web server and reverse proxy that automatically handles HTTPS certificates via Let's Encrypt. In this setup, it acts as the entry point for all self-hosted services, routing traffic based on domain names and providing SSL termination.
+Caddy is a modern web server and reverse proxy that automatically manages HTTPS certificates via Let's Encrypt. In this setup, it acts as the entry point for self-hosted services, routing traffic by hostname and providing SSL termination.
 
-This service uses the [Caddy Docker Proxy](https://github.com/lucaslorentz/caddy-docker-proxy) plugin, which reads Docker container labels to dynamically configure routing without manual Caddyfile editing.
+This service uses the [Caddy Docker Proxy](https://github.com/lucaslorentz/caddy-docker-proxy) plugin to dynamically generate routes from Docker container labels, so you do not need to edit a static Caddyfile.
 
 ## Configuration
 
-- **Image**: Defined by `SEAFILE_CADDY_IMAGE` in the root `.env` file (typically `lucaslorentz/caddy-docker-proxy:alpine`).
+- **Image**: Defined by `CADDY_IMAGE` in the root `.env` file (typically `lucaslorentz/caddy-docker-proxy:alpine`).
 - **Container Name**: `caddy-proxy`.
 - **Ports**: Exposes 80 (HTTP) and 443 (HTTPS/TCP+UDP) on the host.
 - **Network**: Connected to `docker_net` for service discovery.
@@ -19,7 +19,7 @@ This service uses the [Caddy Docker Proxy](https://github.com/lucaslorentz/caddy
 Set in the root `.env` file:
 
 ```env
-SEAFILE_CADDY_IMAGE=lucaslorentz/caddy-docker-proxy:alpine
+CADDY_IMAGE=lucaslorentz/caddy-docker-proxy:alpine
 BASE_STORAGE_DIR=/blk  # Host path for persistent data
 ```
 

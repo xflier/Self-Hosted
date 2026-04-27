@@ -1,6 +1,6 @@
 services:
   caddy:
-    image: ${SEAFILE_CADDY_IMAGE:?Variable is not set}
+    image: ${SEAFILE_CADDY_IMAGE:-lucaslorentz/caddy-docker-proxy:alpine}
     restart: unless-stopped
     container_name: caddy-proxy
     ports:

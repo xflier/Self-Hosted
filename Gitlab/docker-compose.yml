@@ -2,25 +2,34 @@ services:
   gitlab:
     image: ${GITLAB_IMAGE:?Variable is not set}
     container_name: gitlab
+    restart: unless-stopped
+    hostname: ${GITLAB_HOST:?Variable is not set}
     environment:
-      GITLAB_ROOT_EMAIL: ${ROOT_EMAIL:?Variable is not set} # User email
-      GITLAB_ROOT_PASSWORD: ${ROOT_PASSWD:?Variable is not set} # User password (at least 12 characters)
+      GITLAB_ROOT_EMAIL: ${GITLAB_ROOT_EMAIL} # User email
+      GITLAB_ROOT_PASSWORD: ${GITLAB_ROOT_PASSWD} # User password (at least 12 characters)
       GITLAB_OMNIBUS_CONFIG: |
-        external_url  "${GITLAB_URL:?Variable is not set}"
-        nginx['listen_port'] = 8000
+        external_url  "${SERVER_PROTOCOL:?Variable is not set}://${GITLAB_HOST:?Variable is not set}"
         gitlab_rails['gitlab_shell_ssh_port'] = 2222
-    ports:
-      - "${GITLAB_PORT}:8000" # Web UI
-      - "2222:22" # SSH (Host 2222 → Container 22)
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/gitlab/config:/etc/gitlab
       - ${BASE_STORAGE_DIR:?Variable is not set}/gitlab/data:/var/opt/gitlab
+      - ${BASE_STORAGE_DIR:?Variable is not set}/gitlab/logs:/var/log/gitlab
+    shm_size: '256m'
     networks:
       - docker_net
+    ports:
+      - "2222:22"
+      - "${GITLAB_PORT:?Variable is not set}:80"
+    labels:
+      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${GITLAB_HOST:?Variable is not set}
+      caddy.reverse_proxy: "{{upstreams 80}}"
 
   gitlab-runner:
     image: ${GITLAB_RUNNER_IMAGE:?Variable is not set}
     container_name: gitlab-runner
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${BASE_STORAGE_DIR}/gitlab/runner-config:/etc/gitlab-runner
@@ -30,4 +39,3 @@ services:
 networks:
   docker_net:
     external: true
-

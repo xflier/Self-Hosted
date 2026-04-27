@@ -44,20 +44,8 @@ BASE_STORAGE_DIR=/blk
 
 ### Database Setup
 
-Seafile requires MariaDB. Ensure the database is created before starting:
+Seafile should handle it when first running it.
 
-The MariaDB init.sql should include:
-
-```sql
-CREATE DATABASE ccnet_db;
-CREATE DATABASE seafile_db;
-CREATE DATABASE seahub_db;
-CREATE USER 'seafile_user'@'seafile' IDENTIFIED BY '<password>';
-GRANT ALL PRIVILEGES ON ccnet_db.* TO 'seafile_user'@'seafile';
-GRANT ALL PRIVILEGES ON seafile_db.* TO 'seafile_user'@'seafile';
-GRANT ALL PRIVILEGES ON seahub_db.* TO 'seafile_user'@'seafile';
-FLUSH PRIVILEGES;
-```
 
 ### Persistent Storage
 

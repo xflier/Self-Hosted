@@ -1,0 +1,20 @@
+services:
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    restart: always
+    environment:
+      - RI_APP_PORT=5540
+      # - RI_ENCRYPTION_KEY=a_very_long_random_string_here  # Use a real secret!
+      # - RI_STDOUT_LOGGER=true
+    volumes:
+      - /blk/redis/insight :/data
+    user: "0:0"
+    ports:
+      - "5540:5540"
+    networks:
+      - docker_net
+
+networks:
+  docker_net:
+    external: true

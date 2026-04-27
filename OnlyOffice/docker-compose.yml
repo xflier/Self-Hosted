@@ -3,6 +3,7 @@ services:
     image: ${ONLYOFFICE_IMAGE:?Variable is not set}
     restart: unless-stopped
     container_name: onlyoffice
+    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
     environment:
       - DB_TYPE=mariadb
       - DB_HOST=${MARIA_DB_HOST:?Variable is not set}
@@ -12,30 +13,43 @@ services:
       - DB_NAME=${ONLYOFFICE_DB_NAME:?Variable is not set}
       - WOPI_ENABLED=true
       - JWT_ENABLED=true
-      - JWT_SECRET=${JWT_PRIVATE_KEY}
+      - JWT_SECRET=${JWT_PRIVATE_KEY:?Variable is not set}
       - ALLOW_META_IP_ADDRESS=true
       - ALLOW_PRIVATE_IP_ADDRESS=true
-      # - USE_UNAUTHORIZED_STORAGE=true
-      # - AMQP_URI=amqp://guest:guest@rabbitmq
+      - USE_UNAUTHORIZED_STORAGE=true
+      - REDIS_SERVER_HOST=${REDIS_HOST:?Variable is not set}
+      - REDIS_SERVER_PORT=${REDIS_PORT:?Variable is not set}
+      - REDIS_SERVER_DB=${ONLYOFFICE_REDIS_DB:?Variable is not set}
+      - REDIS_SERVER_PASSWORD=${REDIS_PASSWORD:?Variable is not set}
+      - AMQP_URI=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/${RABBITMQ_DEFAULT_VHOST}
     stdin_open: true
     stop_grace_period: 60s
+    # extra_hosts:
+    #   - "${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
+    #   - "${OCIS_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
     volumes:
-      - ${BASE_STORAGE_DIR:-/blk}/onlyoffice/logs:/var/log/onlyoffice
-      - ${BASE_STORAGE_DIR:-/blk}/onlyoffice/data:/var/www/onlyoffice/Data
-      - ${BASE_STORAGE_DIR:-/blk}/onlyoffice/lib:/var/lib/onlyoffice
-      - ${BASE_STORAGE_DIR:-/blk}/onlyoffice/examples:/var/www/onlyoffice/documentserver-example/public/files
-      - ${BASE_STORAGE_DIR:-/blk}/onlyoffice/fonts:/usr/share/fonts
-      - ${BASE_STORAGE_DIR:-/blk}/onlyoffice/caches:/var/lib/onlyoffice/documentserver/App_Data/cache/files
+      - ${BASE_STORAGE_DIR:?Variable is not set}/onlyoffice/logs:/var/log/onlyoffice:z
+      - ${BASE_STORAGE_DIR:?Variable is not set}/onlyoffice/data:/var/www/onlyoffice/Data:z
+      - ${BASE_STORAGE_DIR:?Variable is not set}/onlyoffice/lib:/var/lib/onlyoffice:z
+      - ${BASE_STORAGE_DIR:?Variable is not set}/onlyoffice/examples:/var/www/onlyoffice/documentserver-example/public/files:z
+      - ${BASE_STORAGE_DIR:?Variable is not set}/onlyoffice/fonts:/usr/share/fonts:z
+      - ${BASE_STORAGE_DIR:?Variable is not set}/onlyoffice/caches:/var/lib/onlyoffice/documentserver/App_Data/cache/files:z
     labels:
       caddy: ${SERVER_PROTOCOL:-http}://${ONLYOFFICE_SERVER_HOSTNAME:?Variable is not set or empty}
       caddy.reverse_proxy: "{{upstreams 80}}"
     depends_on:
       mariadb:
         condition: service_healthy
-      # rabbitmq:
-      #   condition: service_started
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/hosting/discovery"]
     networks:
       - docker_net
+      #  aliases:
+      #    - ${ONLYOFFICE_SERVER_HOSTNAME:?Variable is not set or empty}
 
 networks:
   docker_net:

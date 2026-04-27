@@ -2,7 +2,7 @@ services:
   postgres:
     image: ${POSTGRES_IMAGE:?Variable is not set}
     container_name: postgres
-    # user: ${UID:-0}:${GID:-0}
+    user: ${UID:-0}:${GID:-0}
     restart: unless-stopped
     shm_size: 128mb
     # ports:

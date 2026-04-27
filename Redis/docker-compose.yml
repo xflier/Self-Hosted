@@ -1,6 +1,6 @@
 services:
   redis:
-    image: ${REDIS_IMAGE:-redis}
+    image: ${REDIS_IMAGE:?Variable is not set}
     container_name: redis
     restart: unless-stopped
     command:

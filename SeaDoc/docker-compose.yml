@@ -14,9 +14,10 @@ services:
       - TIME_ZONE=${TIME_ZONE:?Variable is not set}
       - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:?Variable is not set or empty}
       - NON_ROOT=${NON_ROOT:-false}
-      - SEAHUB_SERVICE_URL=${SERVER_PROTOCOL:?Variable is not set}://${SEAFILE_SERVER_HOSTNAME:?Variable is not set}
+      # - SEAHUB_SERVICE_URL=${SERVER_PROTOCOL:?Variable is not set}://${SEAFILE_SERVER_HOSTNAME:?Variable is not set}
+      - SEAHUB_SERVICE_URL=http://seafile
     labels:
-      caddy: ${SERVER_PROTOCOL:-http}://${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}
+      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}
       caddy.@ws.0_header: "Connection *Upgrade*"
       caddy.@ws.1_header: "Upgrade websocket"
       caddy.0_reverse_proxy: "@ws {{upstreams 80}}"
@@ -28,6 +29,8 @@ services:
       caddy.2_handle_path.1_reverse_proxy: "{{upstreams 80}}"
     depends_on:
       mariadb:
+        condition: service_started
+      seafile:
         condition: service_started
     networks:
       - docker_net

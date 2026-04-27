@@ -1,13 +1,13 @@
 # Replace the keys below with the one from the generateserverkeys command.
-SECRET_KEY: '<SECRET KEY generated>'
-ACTIVATION_LINK_SECRET: '<Generated>'
-DB_SECRET: '<SECRET generate>'
-EMAIL_SECRET_SALT: '<generated>'
-PRIVATE_KEY: '<generated>'
-PUBLIC_KEY: '<generated>'
+SECRET_KEY: 'hTx48XwhjpBsXf1fiW3A6vd0vauMB8j212PZ628BswFVZQ2Kv1yZHS9G9OJEhqWP'
+ACTIVATION_LINK_SECRET: '65HrPdDvhJKwI5MEnoI0PViOMTITlYVL1Nw03TDTcfRXveJKP2580zsRC9qO15Kf'
+DB_SECRET: 'GAbiELAYCfH6g4MNRgIETdezdEVOLWnFVWsW6OAOFyuTtPdGGF5pWpnZ51zFX8Xt'
+EMAIL_SECRET_SALT: '$2b$12$r4cZ/zjsssZ7.wxp3zJfmO'
+PRIVATE_KEY: '21b45a7c80529ba163bca22a086a19f06004f9a73afdb38793fd6e6aae47025f'
+PUBLIC_KEY: '980f812ee39a7cd8345f8c4cd44b7079ae65bc7d5d6874847dda764b1b5b195f'
 
 # The URL of the web client (path to e.g activate.html without the trailing slash)
-WEB_CLIENT_URL: 'https://<psono domain in .env>'
+WEB_CLIENT_URL: 'https://psono.test.localhost'
 
 # The number of proxies in your environment to parse the X-Forwarded-For header. The basic setup of Psono uses 2
 # reverse proxies, the regular one and one in the combo container. If you have additional Loadbalancers you may have
@@ -29,10 +29,10 @@ DEBUG: False
 ALLOWED_HOSTS: ['*']
 
 # Should be your domain without "www.". Will be the last part of the username
-ALLOWED_DOMAINS: ['<psono domain in .env>']
+ALLOWED_DOMAINS: ['psono.test.localhost']
 
 # If you want to disable registration, you can comment in the following line
-# ALLOW_REGISTRATION: False
+# ALLOW_REGISTRATION: True
 
 # If you want to disable the lost password functionality, you can comment in the following line
 # ALLOW_LOST_PASSWORD: False
@@ -45,15 +45,15 @@ ALLOWED_DOMAINS: ['<psono domain in .env>']
 
 # Should be the URL of the host under which the host is reachable
 # If you open the url and append /info/ to it you should have a text similar to {"info":"{\"version\": \"....}
-HOST_URL: 'https://<psono domain in .env>/server'
+HOST_URL: 'https://psono.test.localhost/server'
 
 # The email used to send emails, e.g. for activation
 # ATTENTION: If executed in a docker container, then "localhost" will resolve to the docker container, so
 # "localhost" will not work as host. Use the public IP or DNS record of the server.
-EMAIL_FROM: 'example@yahoo.com'
+EMAIL_FROM: 'xflier@yahoo.com'
 EMAIL_HOST: 'smtp.mail.yahoo.com'
-EMAIL_HOST_USER: 'example@yahoo.com'
-EMAIL_HOST_PASSWORD : '<encrpted password>'
+EMAIL_HOST_USER: 'xflier@yahoo.com'
+EMAIL_HOST_PASSWORD : 'bhtnorbclytjoyap'
 EMAIL_PORT: 587
 EMAIL_SUBJECT_PREFIX: ''
 EMAIL_USE_TLS: True
@@ -122,10 +122,10 @@ DISABLE_CENTRAL_SECURITY_REPORTS: True
 DATABASES:
     default:
         'ENGINE': 'django.db.backends.postgresql_psycopg2'
-        'NAME': '<psono db name in .env>'
-        'USER': '<psono user login in .env>'
-        'PASSWORD': '<psono user password in .env>'
-        'HOST': '<psono db name in .env>'
+        'NAME': 'psono_db'
+        'USER': 'psono'
+        'PASSWORD': 'abc123abc123'
+        'HOST': 'postgres'
         'PORT': '5432'
 # for master / slave replication setup comment in the following (all reads will be redirected to the slave
 #    slave:

@@ -4,15 +4,17 @@ PostgreSQL is a powerful, open-source relational database system used by several
 
 ## Configuration
 
-- **Image**: Specified by `POSTGRES_IMAGE` in the root `.env` file (default: `postgres:17.9-alpine3.23`).
-- **Container Name**: `postgres`.
-- **Network**: Attached to the shared `docker_net` network.
-- **Restart Policy**: `unless-stopped` for automatic recovery.
-- **Shared Memory**: Set to 128MB for performance optimization.
+- **Image**: Defined by `POSTGRES_IMAGE` in the root `.env` file.
+- **Container name**: `postgres`
+- **User**: Uses `${UID:-0}:${GID:-0}` to keep file ownership aligned with the host user when available.
+- **Restart policy**: `unless-stopped`
+- **Shared memory**: `128mb`
+- **Network**: Attached to external `docker_net`
+- **Host port exposure**: None by default; the container is intended to be accessed via Docker networking.
 
-### Environment Variables
+### Environment variables
 
-Define these in the root `.env` file:
+Define these variables in the root `.env` file:
 
 ```env
 POSTGRES_IMAGE=postgres:17.9-alpine3.23
@@ -22,14 +24,18 @@ POSTGRES_DB=postgres
 BASE_STORAGE_DIR=/blk
 ```
 
-**key Variables**:
-- `POSTGRES_USER`: Root username for the database.
-- `POSTGRES_PASSWORD`: Root password (store securely in `.env`).
-- `POSTGRES_DB`: Default database created at initialization.
+Key variables:
 
-### Initialization Script
+- `POSTGRES_IMAGE`: PostgreSQL container image.
+- `POSTGRES_USER`: Database superuser name.
+- `POSTGRES_PASSWORD`: Database superuser password.
+- `POSTGRES_DB`: Default database created when the container initializes.
 
-The `init.sql` file in the PostgreSQL directory is run automatically on first startup. Use it to create additional databases and users for specific services:
+### Initialization script
+
+The compose stack mounts `${BASE_STORAGE_DIR}/init/postgres` to `/docker-entrypoint-initdb.d`. Any `.sql` or `.sh` file in that directory is executed when the container initializes for the first time.
+
+If you want to create service-specific users and databases, update `PostgreSQL/init.sql` and ensure it is copied into `${BASE_STORAGE_DIR}/init/postgres` before the first run:
 
 ```sql
 create user <psono_user> with password '<psono_password>';
@@ -57,7 +63,7 @@ The initialization scripts directory is at `${BASE_STORAGE_DIR:-/blk}/init/postg
    ```
 4. Other containers can connect using hostname `postgres` on port 5432 with the credentials defined in `.env`.
 
-## Integration with Psono
+## Psono integration
 
 Psono uses PostgreSQL as its backend. To configure:
 
@@ -83,7 +89,7 @@ Psono uses PostgreSQL as its backend. To configure:
 
 ## Notes
 
-- **Data Persistence**: Unlike ephemeral containers, PostgreSQL data survives restarts thanks to the volume mapping.
-- **Port Exposure**: By default, port 5432 is not exposed to the host; services communicate via the Docker network.
+- Services should connect to PostgreSQL via the Docker network, not through a published host port.
+- The container is configured for internal service communication in the self-hosted stack.
 
 For detailed documentation, visit the [official PostgreSQL Docker image page](https://hub.docker.com/_/postgres).
