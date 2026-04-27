@@ -65,6 +65,11 @@ services:
       options:
         max-size: "200k"
         max-file: "5"
+    
+    # make the host machine's gateway available to the container, so that the app provider containers can reach the oCIS server via the host's gateway IP address (which is what they see as the address of the oCIS server)
+    # it seems it is needed when using the host.docker.internal address in the app provider containers, otherwise they cannot reach the oCIS server (probably because of some DNS resolution issue), while with this extra_hosts entry, they can reach the oCIS server via the host's gateway IP address
+    # might be needed when using localhost domain names like ocis.test.localhost
+    # comment them out when using real domain names
     extra_hosts:
       - "${OCIS_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
     networks:
@@ -86,6 +91,8 @@ services:
     entrypoint:
       - /bin/sh
     command: ["-c", "ocis collaboration server"]
+
+    # it seems it is needed when using the localhost domain names, comment it out when using real domain names
     extra_hosts:
       - "${OCIS_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
       - "${ONLYOFFICE_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
