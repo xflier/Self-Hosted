@@ -1,0 +1,82 @@
+services:
+  openclaw-gateway:
+    image: ${OPENCLAW_IMAGE:?Variable is not set}
+    container_name: openclaw-gateway
+    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
+    environment:
+      HOME: /root
+      TERM: xterm-256color
+      OPENCLAW_GATEWAY_TOKEN: "${OPENCLAW_GATEWAY_TOKEN:?Variable is not set}"
+      TZ: ${TIME_ZONE:?Variable is not set}
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/openclaw/home:/root/.openclaw
+      - ${BASE_STORAGE_DIR:?Variable is not set}/openclaw/runtime-deps:/var/lib/openclaw/plugin-runtime-deps
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    # ports:
+    #   - "${OPENCLAW_GATEWAY_PORT:?Variable is not set}:18789"
+    #   - "${OPENCLAW_BRIDGE_PORT:?Variable is not set}:18790"
+    init: true
+    restart: unless-stopped
+    networks:
+      - docker_net
+    labels:
+      caddy: ${OPENCLAW_SERVER_HOSTNAME:?Variable is not set}
+      caddy.reverse_proxy: "{{upstreams 18789}}"
+      caddy.reverse_proxy.0_header_up: "Host {host}"
+      caddy.reverse_proxy.1_header_up: "X-Real-IP {remote_host}"
+    command:
+      [
+        "node",
+        "dist/index.js",
+        "gateway",
+        "--bind",
+        "${OPENCLAW_GATEWAY_BIND:-lan}",
+        "--port",
+        "18789",
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  openclaw-cli:
+    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    network_mode: "service:openclaw-gateway"
+    cap_drop:
+      - NET_RAW
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      HOME: /root
+      TERM: xterm-256color
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      # OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: ${OPENCLAW_ALLOW_INSECURE_PRIVATE_WS:-}
+      BROWSER: echo
+      # CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
+      # CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
+      # CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
+      OPENCLAW_PLUGIN_STAGE_DIR: /var/lib/openclaw/plugin-runtime-deps
+      TZ: ${TIME_ZONE:?Variable is not set}
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/openclaw/home:/root/.openclaw
+      - ${BASE_STORAGE_DIR:?Variable is not set}/openclaw/runtime-deps:/var/lib/openclaw/plugin-runtime-deps
+    stdin_open: true
+    tty: true
+    init: true
+    entrypoint: ["node", "dist/index.js"]
+    depends_on:
+      - openclaw-gateway
+
+networks:
+  docker_net:
+    external: true

@@ -21,6 +21,7 @@ The root `COMPOSE_FILE` includes:
 - `OnlyOffice/docker-compose.yml`
 - `Ocis/docker-compose.yml`
 - `Collabora/docker-compose.yml`
+- `Openclaw/docker-compose.yml`
 - `Caddy-Proxy/docker-compose.yml`
 
 The compose path separator is defined by `COMPOSE_PATH_SEPARATOR=','`.
@@ -55,6 +56,7 @@ The root `.env` file controls image versions, hostnames, storage paths, and cred
 - `RABBITMQ_IMAGE`
 - `OCIS_IMAGE`
 - `COLLABORA_IMAGE`
+- `OPENCLAW_IMAGE`
 
 ### Hostnames and startup parameters
 
@@ -65,6 +67,7 @@ The root `.env` file controls image versions, hostnames, storage paths, and cred
 - `OCIS_SERVER_HOSTNAME`
 - `GITLAB_SERVER_HOSTNAME`
 - `COLLABORA_SERVER_HOSTNAME`
+- `OPENCLAW_SERVER_HOSTNAME`
 
 ### Authentication and service credentials
 
