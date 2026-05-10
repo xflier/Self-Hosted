@@ -1,0 +1,18 @@
+services:
+  openwebui:
+    image: ${OPEN_WEBUI_IMAGE:?Variable is not set}
+    container_name: openwebui
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/openwebui:/app/backend/data
+    environment:
+      - WEBUI_SECRET_KEY=${PRIVATE_API_KEY:?Variable is not set}
+    restart: unless-stopped
+    networks:
+      - docker_net
+    labels:
+      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+
+networks:
+  docker_net:
+    external: true
