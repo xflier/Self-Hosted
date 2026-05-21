@@ -35,7 +35,7 @@ Key variables:
 
 The compose stack mounts `${BASE_STORAGE_DIR}/init/postgres` to `/docker-entrypoint-initdb.d`. Any `.sql` or `.sh` file in that directory is executed when the container initializes for the first time.
 
-If you want to create service-specific users and databases, update `PostgreSQL/init.sql` and ensure it is copied into `${BASE_STORAGE_DIR}/init/postgres` before the first run:
+If you want to create service-specific users and databases, create an `init.sql` file and place it at `${BASE_STORAGE_DIR}/init/postgres` before the first run:
 
 ```sql
 create user <psono_user> with password '<psono_password>';
@@ -45,7 +45,7 @@ GRANT ALL PRIVILEGES ON DATABASE <psono_db> TO <psono_user>;
 
 Replace placeholders with actual values from your `.env` file. This script runs only once; subsequent container starts do not re-execute it.
 
-Copy the init.sql to ${BASE_STORAGE_DIR:?Variable is not set}/init/postgres and no need to manually run it.
+Place the file at `${BASE_STORAGE_DIR:-/blk}/init/postgres` — it runs automatically on container creation.
 
 ### Persistent Storage
 
@@ -56,7 +56,7 @@ The initialization scripts directory is at `${BASE_STORAGE_DIR:-/blk}/init/postg
 ## Usage
 
 1. Include `PostgreSQL/docker-compose.yml` in your `COMPOSE_FILE` if a service requires it (e.g., Psono).
-2. Update `init.sql` with the database and user configuration for your services.
+2. Create and place `init.sql` at `${BASE_STORAGE_DIR}/init/postgres` with your database and user configuration.
 3. Start the service:
    ```sh
    docker compose up -d postgres
@@ -85,7 +85,7 @@ Psono uses PostgreSQL as its backend. To configure:
 
 ## Troubleshooting
 
-- **Init Script Not Running**: Ensure `init.sql` exists at `${BASE_STORAGE_DIR}/init/postgres/init.sql` before first startup; it only runs on container creation.
+- **Init Script Not Running**: Ensure the SQL file is placed at `${BASE_STORAGE_DIR}/init/postgres` before container creation; init scripts only run once.
 
 ## Notes
 

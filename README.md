@@ -60,7 +60,7 @@ The root `.env` file controls image versions, hostnames, storage paths, and cred
 - `COLLABORA_IMAGE`
 - `OPENCLAW_IMAGE`
 - `HERMES_AGENT_IMAGE`
-- `OPENWEBUI_IMAGE`
+- `OPEN_WEBUI_IMAGE`
 
 ### Hostnames and startup parameters
 
@@ -72,8 +72,7 @@ The root `.env` file controls image versions, hostnames, storage paths, and cred
 - `GITLAB_SERVER_HOSTNAME`
 - `COLLABORA_SERVER_HOSTNAME`
 - `OPENCLAW_SERVER_HOSTNAME`
-- `HERMES_SERVER_HOSTNAME`
-- `OPENWEBUI_SERVER_HOSTNAME`
+- `OPEN_WEBUI_SERVER_HOSTNAME`
 
 ### Authentication and service credentials
 

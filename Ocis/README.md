@@ -35,13 +35,10 @@ Set the following variables before starting the stack:
 - `BASE_STORAGE_DIR`
 - `JWT_PRIVATE_KEY`
 - `ONLYOFFICE_SERVER_HOSTNAME`
-- `COMPANION_SERVER_HOSTNAME`
-- `COLLABORA_SERVER_HOSTNAME`
 
 Optional environment variables used in the compose file:
 
 - `LOG_PRETTY`
-- `ONLYOFFICE_SERVER_HOSTNAME`
 - `COMPANION_SERVER_HOSTNAME`
 - `COLLABORA_SERVER_HOSTNAME`
 

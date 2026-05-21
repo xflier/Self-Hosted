@@ -15,12 +15,12 @@ MariaDB is a MySQL-compatible relational database server that serves as the back
 Define these in the root `.env` file:
 
 ```env
-INIT_MARIA_ROOT_PASSWORD=<root password>
+MARIA_ROOT_PASSWORD=<root password>
 BASE_STORAGE_DIR=/blk            # or another host path
 MARIA_DB_IMAGE=mariadb:latest    # image tag to use
 ```
 
-> **Important**: `MARIADB_ROOT_PASSWORD` in the compose file is set via `INIT_MARIA_ROOT_PASSWORD`. Any changes here must be coordinated with services that connect to this database.
+> **Important**: `MARIADB_ROOT_PASSWORD` in the compose file is set via `MARIA_ROOT_PASSWORD`. Any changes here must be coordinated with services that connect to this database.
 
 ### Persistent Storage
 
@@ -50,7 +50,6 @@ Database files are persisted on the host at `${BASE_STORAGE_DIR:-/blk}/mariadb/d
 
 ## Notes
 
-- Auto-upgrade is enabled (`MARIADB_AUTO_UPGRADE=1`) for seamless schema updates.
-- Console logging is active for easier debugging.
+- `MARIADB_AUTO_UPGRADE` and `MYSQL_LOG_CONSOLE` are available but commented out in the compose file; uncomment them if needed.
 
 For advanced configuration, see the [official MariaDB Docker image docs](https://hub.docker.com/_/mariadb).
