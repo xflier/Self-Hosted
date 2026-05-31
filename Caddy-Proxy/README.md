@@ -8,10 +8,14 @@ This service uses the [Caddy Docker Proxy](https://github.com/lucaslorentz/caddy
 
 - **Image**: Defined by `CADDY_IMAGE` in the root `.env` file (typically `lucaslorentz/caddy-docker-proxy:alpine`).
 - **Container Name**: `caddy-proxy`.
-- **Ports**: Exposes 80 (HTTP) and 443 (HTTPS/TCP+UDP) on the host.
+- **Ports**: Exposes 80 and 443 on the host.
+- **Port mappings**:
+  - `80:80`
+  - `443:443/tcp`
+  - `443:443/udp`
 - **Network**: Connected to `docker_net` for service discovery.
 - **Volumes**:
-  - `/var/run/docker.sock`: Allows Caddy to inspect running containers and their labels.
+  - `/var/run/docker.sock:/var/run/docker.sock`: Allows Caddy to inspect running containers and their labels.
   - `${BASE_STORAGE_DIR:-/blk}/caddy-proxy:/data/caddy`: Persists certificates, keys, and configuration data.
 
 ### Environment Variables

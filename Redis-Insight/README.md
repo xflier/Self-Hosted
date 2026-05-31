@@ -7,7 +7,7 @@ This service runs RedisInsight, a web-based management UI for Redis.
 - **Service name**: `redisinsight`
 - **Container name**: `redisinsight`
 - **Image**: `redis/redisinsight:latest`
-- **Restart policy**: `always`
+- **Restart policy**: `no`
 - **Network**: attached to the external `docker_net`
 - **Port**:
   - `5540:5540`

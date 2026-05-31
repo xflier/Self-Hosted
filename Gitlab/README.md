@@ -28,8 +28,8 @@ Set the following variables before starting the stack:
 
 - `GITLAB_IMAGE`: GitLab Omnibus Docker image.
 - `GITLAB_RUNNER_IMAGE`: GitLab Runner image.
-- `GITLAB_HOST`: hostname for GitLab access, e.g. `gitlab.example.com`.
-- `GITLAB_PORT`: host HTTP port mapped to container port `80`.
+- `GITLAB_SERVER_HOSTNAME`: hostname for GitLab access, e.g. `gitlab.example.com`.
+- `GITLAB_PORT`: (optional) host HTTP port to map to container port `80` if you choose to publish the web UI directly instead of using a reverse proxy. This port mapping is commented out by default in `docker-compose.yml`.
 - `GITLAB_ROOT_EMAIL`: root user email.
 - `GITLAB_ROOT_PASSWD`: root password (minimum 12 characters).
 - `SERVER_PROTOCOL`: protocol used by the proxy, e.g. `https`.
@@ -43,6 +43,7 @@ Persistent data is stored under:
 - `${BASE_STORAGE_DIR}/gitlab/data`
 - `${BASE_STORAGE_DIR}/gitlab/logs`
 - `${BASE_STORAGE_DIR}/gitlab/runner-config`
+- `/var/run/docker.sock:/var/run/docker.sock` for `gitlab-runner` to operate Docker jobs.
 
 ## Start the stack
 
@@ -56,7 +57,7 @@ If you launch from the repo root, include `Gitlab/docker-compose.yml` in `COMPOS
 
 ## Access
 
-- Web UI: `http://${GITLAB_HOST}` or `https://${GITLAB_HOST}` depending on proxy configuration.
+- Web UI: `http://${GITLAB_SERVER_HOSTNAME}` or `https://${GITLAB_SERVER_HOSTNAME}` depending on proxy configuration. The compose file does not expose port `80` on the host by default.
 - Git SSH: host port `2222` → container port `22`.
 
 ## GitLab Runner registration
@@ -95,6 +96,6 @@ docker compose down gitlab
 ## Troubleshooting
 
 - Ensure the external network `docker_net` exists.
-- Verify that `GITLAB_HOST` resolves to the server IP.
+- Verify that `GITLAB_SERVER_HOSTNAME` resolves to the server IP.
 - Confirm `GITLAB_ROOT_PASSWD` meets GitLab Omnibus strength requirements.
 - Check Caddy proxy labels and reverse proxy configuration if HTTP/HTTPS access fails.

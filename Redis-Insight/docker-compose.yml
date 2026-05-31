@@ -8,8 +8,8 @@ services:
       # - RI_ENCRYPTION_KEY=a_very_long_random_string_here  # Use a real secret!
       # - RI_STDOUT_LOGGER=true
     volumes:
-      - /blk/redis/insight :/data
-    user: "0:0"
+      - ${BASE_STORAGE_DIR:?Variable is not set}/redis/insight:/data
+    user: "${UID:?Variable is not set}:${GID:?Variable is not set}"
     ports:
       - "5540:5540"
     networks:

@@ -28,6 +28,10 @@ Adminer is not included in the main `.env` configuration and should be run indep
 
 4. Log in using your database credentials (host, username, password, database name).
 
+## Compose mapping
+
+- Host port `18080` is forwarded to container port `8080` via `18080:8080`.
+
 ## Stopping the Service
 
 To stop Adminer:
