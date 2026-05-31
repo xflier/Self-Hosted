@@ -5,8 +5,8 @@ services:
     user: ${UID:?Variable is not set}:${GID:?Variable is not set}
     environment:
       - MARIADB_ROOT_PASSWORD=${MARIA_ROOT_PASSWORD:?Variable is not set}
-      # - MYSQL_LOG_CONSOLE=true
-      # - MARIADB_AUTO_UPGRADE=1
+      - MYSQL_LOG_CONSOLE=true
+      - MARIADB_AUTO_UPGRADE=1
     volumes:
       - "${BASE_STORAGE_DIR:-/blk}/mariadb/db:/var/lib/mysql"
     networks:

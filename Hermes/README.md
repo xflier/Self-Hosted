@@ -4,58 +4,73 @@ Hermes is an AI agent platform that provides multi-agent capabilities for autono
 
 ## Configuration
 
-- **Image**: Specified by `HERMES_AGENT_IMAGE` in the root `.env` file.
-- **Network**: Attached to the shared `docker_net` network.
-- **Restart Policy**: `unless-stopped` for automatic recovery.
-- **Resource Limits**: 4GB memory, 2 CPUs per agent.
+- **Agent image**: `HERMES_AGENT_IMAGE` in the root `.env`
+- **Workspace image**: `HERMES_WORKSPACE_IMAGE` in the root `.env`
+- **Network**: attached to the shared `docker_net` network
+- **Restart policy**: `unless-stopped`
+- **Resource limits**: 4GB memory, 2 CPUs for each agent container
 
-### Agents
+## Services
 
-This service runs multiple Hermes agent instances:
+This compose file defines three containers:
 
-1. **hermes-agent** (main gateway agent)
-   - Runs with `gateway run` command
-   - Exposes dashboard on port 9119
-   - Provides API server functionality
+1. **hermes-agent**
+   - Main gateway agent
+   - Runs `gateway run`
+   - Dashboard enabled with `HERMES_DASHBOARD=1`
+   - API server enabled with `API_SERVER_ENABLED=true`
+   - Data stored at `${BASE_STORAGE_DIR}/hermes/agent1`
 
-2. **xflier-agent** (secondary agent)
-   - Mirrors main agent configuration
-   - Exposes dashboard on port 19119
-   - Separate data volume
+2. **instance-agent**
+   - Secondary Hermes agent instance
+   - Shares the same base image and config style as `hermes-agent`
+   - Runs with its own UID and data volume
+   - Data stored at `${BASE_STORAGE_DIR}/hermes/instance`
 
-### Environment Variables
+3. **hermes-workspace**
+   - Hermes workspace frontend
+   - Connects to `instance-agent` over its internal API and dashboard endpoints
+   - Uses `HERMES_WORKSPACE_PASSWORD` for login
+   - Exposes the workspace via Caddy reverse proxy using `HERMES_WORKSPACE_SERVER_HOSTNAME`
 
-Define these in the root `.env` file:
+## Required Environment Variables
+
+Define the following in the root `.env` file:
 
 ```env
-HERMES_AGENT_IMAGE=<image>
-HERMES_SERVER_HOSTNAME=hermes.example.com
-HERMES_DASHBOARD=1
-API_SERVER_ENABLED=true
-API_SERVER_HOST=0.0.0.0
-PRIVATE_API_KEY=<your-api-key>
+HERMES_AGENT_IMAGE=nousresearch/hermes-agent:latest
+HERMES_WORKSPACE_IMAGE=ghcr.io/outsourc-e/hermes-workspace:latest
 BASE_STORAGE_DIR=/blk
+PRIVATE_API_KEY=<your-api-key>
+HERMES_WORKSPACE_PASSWORD=<workspace-password>
+HERMES_WORKSPACE_SERVER_HOSTNAME=<workspace-hostname>
+SERVER_PROTOCOL=https
 ```
 
-### Persistent Storage
+## Persistent Storage
 
-Data is stored on the host at:
-- `${BASE_STORAGE_DIR}/hermes/agent1` → `/opt/data` (hermes-agent)
-- `${BASE_STORAGE_DIR}/hermes/xflier` → `/opt/data` (xflier-agent)
+Host volumes mount:
+- `${BASE_STORAGE_DIR}/hermes/agent1:/opt/data` for `hermes-agent`
+- `${BASE_STORAGE_DIR}/hermes/instance:/opt/data` for `instance-agent`
+- `${BASE_STORAGE_DIR}/hermes/instance:/home/workspace/.hermes` for `hermes-workspace`
+- `${BASE_STORAGE_DIR}/hermes/workspace:/workspace` for `hermes-workspace`
 
-Each agent maintains its own data, models, and configuration state.
+## Starting Hermes
 
-## Usage
+1. Add `Hermes/docker-compose.yml` to your `COMPOSE_FILE`.
+2. Start the Hermes stack:
 
-1. Include `Hermes/docker-compose.yml` in your `COMPOSE_FILE`.
-2. Start the service:
-   ```sh
-   docker compose up -d hermes-agent xflier-agent
-   ```
-3. Access the dashboards at:
-   - Main agent: `http://localhost:9119`
-   - Secondary agent: `http://localhost:19119`
-4. Interact with agents via the API using the configured `PRIVATE_API_KEY`.
+```sh
+docker compose up -d hermes-agent instance-agent hermes-workspace
+```
+
+3. Access the workspace frontend using the configured hostname:
+
+```text
+https://${HERMES_WORKSPACE_SERVER_HOSTNAME}
+```
+
+> The agent API and dashboard ports are not exposed by default in `docker-compose.yml`; the workspace service is intended to provide the main external interface.
 
 ## Features
 

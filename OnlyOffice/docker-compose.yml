@@ -24,9 +24,6 @@ services:
       - AMQP_URI=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/${RABBITMQ_DEFAULT_VHOST}
     stdin_open: true
     stop_grace_period: 60s
-    # extra_hosts:
-    #   - "${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
-    #   - "${OCIS_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/onlyoffice/logs:/var/log/onlyoffice:z
       - ${BASE_STORAGE_DIR:?Variable is not set}/onlyoffice/data:/var/www/onlyoffice/Data:z
@@ -48,8 +45,6 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost/hosting/discovery"]
     networks:
       - docker_net
-      #  aliases:
-      #    - ${ONLYOFFICE_SERVER_HOSTNAME:?Variable is not set or empty}
 
 networks:
   docker_net:

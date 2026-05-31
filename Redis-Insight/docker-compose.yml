@@ -1,12 +1,12 @@
 services:
   redisinsight:
-    image: redis/redisinsight:latest
+    image: ${REDIS_INSIGHT_IMAGE:?Variable is not set}
     container_name: redisinsight
-    restart: always
+    restart: no
     environment:
       - RI_APP_PORT=5540
-      # - RI_ENCRYPTION_KEY=a_very_long_random_string_here  # Use a real secret!
-      # - RI_STDOUT_LOGGER=true
+      - RI_ENCRYPTION_KEY=${JWT_PRIVATE_KEY:?Variable is not set}
+      - RI_STDOUT_LOGGER=true
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/redis/insight:/data
     user: "${UID:?Variable is not set}:${GID:?Variable is not set}"

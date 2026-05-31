@@ -3,12 +3,12 @@ services:
     image: ${GITLAB_IMAGE:?Variable is not set}
     container_name: gitlab
     restart: unless-stopped
-    hostname: ${GITLAB_HOST:?Variable is not set}
+    hostname: ${GITLAB_SERVER_HOSTNAME:?Variable is not set}
     environment:
-      GITLAB_ROOT_EMAIL: ${GITLAB_ROOT_EMAIL} # User email
-      GITLAB_ROOT_PASSWORD: ${GITLAB_ROOT_PASSWD} # User password (at least 12 characters)
+      GITLAB_ROOT_EMAIL: ${GITLAB_ROOT_EMAIL:?Variable is not set} # User email
+      GITLAB_ROOT_PASSWORD: ${GITLAB_ROOT_PASSWD:?Variable is not set} # User password (at least 12 characters)
       GITLAB_OMNIBUS_CONFIG: |
-        external_url  "${SERVER_PROTOCOL:?Variable is not set}://${GITLAB_HOST:?Variable is not set}"
+        external_url  "${SERVER_PROTOCOL:?Variable is not set}://${GITLAB_SERVER_HOSTNAME:?Variable is not set}"
         gitlab_rails['gitlab_shell_ssh_port'] = 2222
         nginx['listen_port'] = 80
         nginx['listen_https'] = false
@@ -21,9 +21,9 @@ services:
       - docker_net
     ports:
       - "2222:22"
-      - "${GITLAB_PORT:?Variable is not set}:80"
+      # - "${GITLAB_PORT:?Variable is not set}:80"
     labels:
-      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${GITLAB_HOST:?Variable is not set}
+      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${GITLAB_SERVER_HOSTNAME:?Variable is not set}
       caddy.reverse_proxy: "{{upstreams 80}}"
 
   gitlab-runner:

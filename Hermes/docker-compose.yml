@@ -8,29 +8,71 @@ services:
       - HERMES_DASHBOARD=1
       - API_SERVER_ENABLED=true
       - API_SERVER_HOST=0.0.0.0
+      - HERMES_DASHBOARD_HOST=0.0.0.0
       - API_SERVER_KEY=${PRIVATE_API_KEY:?Variable is not set}
+      - HERMES_DASHBOARD_INSECURE=1
       # - API_SERVER_CORS_ORIGINS=*
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/hermes/agent1:/opt/data
     restart: unless-stopped
-    ports:
+    # ports:
     #   - "8642:8642"   # gateway API
-      - "9119:9119"   # dashboard (only reached when HERMES_DASHBOARD=1)
+    #  - "9119:9119"   # dashboard (only reached when HERMES_DASHBOARD=1)
     networks:
       - docker_net
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://localhost:8642/health && curl -fsS http://localhost:9119/api/status || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
           memory: 4G
           cpus: "2.0"
 
-  xflier-agent:
+  instance-agent:
     <<: *common_settings
-    container_name: xflier-agent
-    ports:
-      - "19119:9119"
+    container_name: instance-agent
+    # ports:
+    #   - "19119:9119"
+    environment:
+      - HERMES_UID=10010
+      - HERMES_DASHBOARD=1
+      - API_SERVER_ENABLED=true
+      - API_SERVER_HOST=0.0.0.0
+      - API_SERVER_KEY=${PRIVATE_API_KEY:?Variable is not set}
+      - HERMES_DASHBOARD_HOST=0.0.0.0
+      - HERMES_DASHBOARD_INSECURE=1
     volumes:
-      - ${BASE_STORAGE_DIR:?Variable is not set}/hermes/xflier:/opt/data
+      - ${BASE_STORAGE_DIR:?Variable is not set}/hermes/instance:/opt/data
+
+  hermes-workspace:
+    image: ${HERMES_WORKSPACE_IMAGE:?Variable is not set}
+    container_name: hermes-workspace
+    restart: unless-stopped
+    environment:
+      - HERMES_HOME=/home/workspace/.hermes
+      - HERMES_WORKSPACE_DIR=/workspace
+      - HERMES_API_URL=http://instance-agent:8642
+      - HERMES_DASHBOARD_URL=http://instance-agent:9119
+      - HERMES_API_TOKEN=${PRIVATE_API_KEY:?Variable is not set}
+      - HERMES_PASSWORD=${HERMES_WORKSPACE_PASSWORD:?Variable is not set}
+      - TRUST_PROXY=1
+      - COOKIE_SECURE=0
+      - HERMES_ALLOW_INSECURE_REMOTE=0
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/hermes/instance:/home/workspace/.hermes
+      - ${BASE_STORAGE_DIR:?Variable is not set}/hermes/workspace:/workspace
+    networks:
+      - docker_net
+    labels:
+      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${HERMES_WORKSPACE_SERVER_HOSTNAME:?Variable is not set}
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+    depends_on:
+      instance-agent:
+        condition: service_healthy
 
 networks:
   docker_net:

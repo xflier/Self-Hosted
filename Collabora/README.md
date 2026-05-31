@@ -61,7 +61,7 @@ This enables a Caddy proxy to route inbound requests to Collabora on port `9980`
 From the repository root, run:
 
 ```sh
-docker compose -f Collabora/docker-compose.yml up -d
+docker compose up -d collabora
 ```
 
 ## Notes
