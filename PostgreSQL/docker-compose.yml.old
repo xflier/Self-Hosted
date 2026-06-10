@@ -12,17 +12,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Variable is not set}
       - POSTGRES_DB=${POSTGRES_DB:?Variable is not set}
     volumes:
-      - ${BASE_STORAGE_DIR:?Variable is not set}/postgres:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?Variable is not set} -d ${POSTGRES_DB:?Variable is not set} -h localhost -p 5432"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - ${BASE_STORAGE_DIR:?Variable is not set}/postgres:/var/lib/postgresql/data
+      - ${BASE_STORAGE_DIR:?Variable is not set}/init/postgres:/docker-entrypoint-initdb.d
     networks:
       - docker_net
 

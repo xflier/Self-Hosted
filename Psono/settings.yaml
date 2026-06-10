@@ -73,8 +73,9 @@ EMAIL_TIMEOUT: 10
 #    redis://[:password]@localhost:6379/0
 #    rediss://[:password]@localhost:6379/0
 #    unix://[:password]@/path/to/socket.sock?db=0
-# CACHE_ENABLE: False
-# CACHE_REDIS: False
+CACHE_ENABLE: False
+CACHE_REDIS: True
+CACHE_REDIS_LOCATION: 'redis://:password_here@redis:6379/13'
 # CACHE_REDIS_LOCATION: 'redis://127.0.0.1:6379/13'
 
 # Enables the management API, required for the psono-admin-client / admin portal (Default is set to False)

@@ -1,39 +1,22 @@
 # Collabora Service
 
-This stack deploys Collabora Online alongside an OCIS collaboration service. It is designed to run with Docker Compose and expects an external `docker_net` network that connects Collabora, OCIS, and the reverse proxy.
+This folder contains a Docker Compose setup for Collabora Online and a related OCIS collaboration service.
 
-## Overview
+## Services
 
-- `collabora`
-  - Runs the Collabora Online server.
-  - Serves WOPI traffic on internal port `9980`.
-  - Is configured for external TLS termination through a reverse proxy.
-  - Includes a healthcheck that validates Collabora discovery at `/hosting/discovery`.
+- `collabora`: runs the Collabora Online document editor.
+- `collaboration`: runs the OCIS collaboration service.
 
-- `collaboration`
-  - Runs the OCIS collaboration service.
-  - Connects to the OCIS service registry using `nats-js-kv`.
-  - Uses `collaboration:9300` as the internal WOPI source.
-  - Exposes gRPC on port `9301` and HTTP on port `9300`.
+## Prerequisites
 
-## Requirements
+- Docker Engine and Docker Compose v2
+- `docker_net` external Docker network
+- Root `.env` with required service variables
+- OCIS deployment available on the shared network
 
-- External Docker network: `docker_net`
-- A running OCIS deployment available to this compose stack
-- A reverse proxy capable of routing traffic based on Caddy labels
-- Valid environment variables in the root `.env` file
+## Configuration
 
-## Create the network
-
-If the external network does not exist, create it with:
-
-```sh
-docker network create docker_net
-```
-
-## Required environment variables
-
-The following variables are required in your root `.env` file or compose environment:
+Required `.env` variables:
 
 - `OCIS_IMAGE`
 - `COLLABORA_IMAGE`
@@ -44,29 +27,27 @@ The following variables are required in your root `.env` file or compose environ
 - `COLLABORA_ADMIN_USER`
 - `COLLABORA_ADMIN_PASSWORD`
 
-## Collabora proxy labels
+The compose file sets:
 
-The `collabora` service exposes these labels for automatic reverse proxy routing:
-
-```yaml
-labels:
-  caddy: ${SERVER_PROTOCOL:?Variable is not set}://${COLLABORA_SERVER_HOSTNAME:?Variable is not set}
-  caddy.reverse_proxy: "{{upstreams 9980}}"
-```
-
-This enables a Caddy proxy to route inbound requests to Collabora on port `9980`.
-
-## Starting the stack
-
-From the repository root, run:
-
-```sh
-docker compose up -d collabora
-```
+- `COLLABORATION_APP_ADDR` and `COLLABORATION_APP_ICON` from the Collabora hostname
+- `COLLABORATION_WOPI_SRC=http://collaboration:9300`
+- `COLLABORATION_APP_INSECURE=true`
+- `COLLABORATION_CS3API_DATAGATEWAY_INSECURE=true`
 
 ## Notes
 
-- `collaboration` depends on `ocis` and `collabora`; ensure those services are available in your total deployment.
-- `COLLABORATION_APP_ADDR` and `COLLABORATION_APP_ICON` are generated from `SERVER_PROTOCOL` and `COLLABORA_SERVER_HOSTNAME`.
-- `COLLABORATION_APP_INSECURE` and `COLLABORATION_CS3API_DATAGATEWAY_INSECURE` are set to `true` because this stack uses insecure internal service communication behind the network boundary.
-- TLS termination is handled by the proxy layer, not inside the Collabora container.
+- `collabora` service uses `DONT_GEN_SSL_CERT=YES` and `--o:ssl.enable=false` to delegate TLS to the reverse proxy.
+- The compose file does not publish Collabora ports directly to the host.
+- Caddy labels in the compose file are commented out by default.
+
+## Start
+
+```sh
+docker compose up -d collabora collaboration
+```
+
+Or from the repository root:
+
+```sh
+docker compose -f Collabora/docker-compose.yml up -d
+```

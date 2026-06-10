@@ -1,0 +1,31 @@
+services:
+  caddy:
+    build:
+      context: ../Caddy
+      dockerfile: Dockerfile
+    image: self-hosted-caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${BASE_STORAGE_DIR:?-Variable is not set or empty}/caddy/data:/data
+      - ${BASE_STORAGE_DIR:?-Variable is not set or empty}/caddy/etc:/etc/caddy
+      - ${BASE_STORAGE_DIR:?-Variable is not set or empty}/caddy/site:/srv
+      - ${BASE_STORAGE_DIR:?-Variable is not set or empty}/caddy/config:/config
+    networks:
+      docker_net:
+        aliases:
+          - ${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set or empty}
+          - ${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set or empty}
+          - ${OCIS_SERVER_HOSTNAME:?Variable is not set or empty}
+          - ${ONLYOFFICE_SERVER_HOSTNAME:?Variable is not set or empty}
+          - ${COLLABORA_SERVER_HOSTNAME:?Variable is not set or empty}
+          - ${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}
+
+networks:
+  docker_net:
+    external: true

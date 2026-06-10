@@ -1,0 +1,13 @@
+{
+  "realm": "ocis",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "ocis",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "redirectUris": ["http://ocis:9200/*"]
+    }
+  ]
+}

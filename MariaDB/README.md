@@ -1,55 +1,28 @@
 # MariaDB Service
 
-MariaDB is a MySQL-compatible relational database server that serves as the backend for several applications in this self-hosted stack, such as Seafile.
+This folder contains a MariaDB database service for the stack.
+
+## Prerequisites
+
+- Docker Engine and Docker Compose v2
+- `docker_net` external Docker network
+- Root `.env` with `MARIA_DB_IMAGE` and `MARIADB_ROOT_PASSWORD`
 
 ## Configuration
 
-- **Image**: Specified by `MARIA_DB_IMAGE` in `.env` (defaults to `mariadb:latest`).
-- **Container Name**: `mariadb`.
-- **Network**: Connected to the shared `docker_net` network for inter-service communication.
-- **Health Check**: Ensures the database is operational before dependent services start.
-- **Restart Policy**: `unless-stopped` for automatic recovery.
-
-### Environment Variables
-
-Define these in the root `.env` file:
-
-```env
-MARIA_ROOT_PASSWORD=<root password>
-BASE_STORAGE_DIR=/blk            # or another host path
-MARIA_DB_IMAGE=mariadb:latest    # image tag to use
-```
-
-> **Important**: `MARIADB_ROOT_PASSWORD` in the compose file is set via `MARIA_ROOT_PASSWORD`. Any changes here must be coordinated with services that connect to this database.
-
-### Persistent Storage
-
-Database files are persisted on the host at `${BASE_STORAGE_DIR:-/blk}/mariadb/db`, mapped to `/var/lib/mysql` in the container. This setup ensures data survives container restarts, updates, or recreations.
+- Image: `${MARIA_DB_IMAGE:-mariadb:latest}`
+- Container name: `mariadb`
+- Persistence: `${BASE_STORAGE_DIR:-/blk}/mariadb/db`
+- Network: `docker_net`
+- Environment variable: `MARIADB_ROOT_PASSWORD`
 
 ## Usage
 
-1. Include `MariaDB/docker-compose.yml` in your `COMPOSE_FILE`.
-2. Launch the service:
-   ```sh
-   docker compose up -d mariadb
-   ```
-3. Other services can connect using hostname `mariadb`, port 3306, with the root credentials.
-
-## Maintenance
-
-- **Backups**: Regularly dump databases using `mysqldump` or export the volume.
-- **Updates**: Pull new images with `docker compose pull mariadb`, then restart.
-- **Logs**: View with `docker compose logs -f mariadb`.
-- **Customization**: Modify `docker-compose.yml` for tuning (e.g., memory limits), but ensure compatibility with dependent services.
-
-## Troubleshooting
-
-- **Connection Issues**: Verify `docker_net` network exists and credentials match.
-- **Health Check Failures**: Check logs for initialization errors; may need to adjust timeouts.
-- **Data Corruption**: Restore from backups if volume issues occur.
+```sh
+docker compose up -d mariadb
+```
 
 ## Notes
 
-- `MARIADB_AUTO_UPGRADE` and `MYSQL_LOG_CONSOLE` are available but commented out in the compose file; uncomment them if needed.
-
-For advanced configuration, see the [official MariaDB Docker image docs](https://hub.docker.com/_/mariadb).
+- The service is intended for internal Docker network use only.
+- The compose file does not expose MySQL port to the host by default.

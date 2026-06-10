@@ -15,9 +15,11 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-    labels:
-      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${VAULT_WARDEN_SERVER_HOSTNAME:?Variable is not set}
-      caddy.reverse_proxy: "{{upstreams 80}}"
+    # The following labels are used by the Caddy Proxy to automatically configure reverse proxying to this service.
+    # not needed if Caddy is used as a standalone reverse proxy with a static Caddyfile configuration
+    # labels:
+    #   caddy: ${SERVER_PROTOCOL:?Variable is not set}://${VAULT_WARDEN_SERVER_HOSTNAME:?Variable is not set}
+    #   caddy.reverse_proxy: "{{upstreams 80}}"
     logging:
       driver: "json-file"
       options:

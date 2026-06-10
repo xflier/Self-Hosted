@@ -17,11 +17,15 @@ services:
       - ${BASE_STORAGE_DIR:?Variable is not net}/psono/settings.yaml:/root/.psono_server/settings.yaml
     depends_on:
       - postgres
+      - redis
     networks:
       - docker_net
-    labels:
-      caddy: ${SERVER_PROTOCOL:?Variable is not net}://${PSONO_SERVER_HOSTNAME:?Variable is not net}
-      caddy.reverse_proxy: "{{upstreams 80}}"
+
+    # The following labels are used by the Caddy Proxy to automatically configure reverse proxying to this service.
+    # not needed if Caddy is used as a standalone reverse proxy with a static Caddyfile configuration
+    # labels:
+    #  caddy: ${SERVER_PROTOCOL:?Variable is not net}://${PSONO_SERVER_HOSTNAME:?Variable is not net}
+    #  caddy.reverse_proxy: "{{upstreams 80}}"
 networks:
   docker_net:
     external: true

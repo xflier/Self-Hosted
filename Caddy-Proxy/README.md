@@ -1,58 +1,32 @@
 # Caddy Proxy Service
 
-Caddy is a modern web server and reverse proxy that automatically manages HTTPS certificates via Let's Encrypt. In this setup, it acts as the entry point for self-hosted services, routing traffic by hostname and providing SSL termination.
+This service runs the `caddy-docker-proxy` image to automatically discover Docker containers with Caddy labels and proxy traffic for them.
 
-This service uses the [Caddy Docker Proxy](https://github.com/lucaslorentz/caddy-docker-proxy) plugin to dynamically generate routes from Docker container labels, so you do not need to edit a static Caddyfile.
+## Prerequisites
+
+- Docker Engine installed
+- External Docker network `docker_net`
+- Root `.env` file with `BASE_STORAGE_DIR` (if different from `/blk`)
 
 ## Configuration
 
-- **Image**: Defined by `CADDY_IMAGE` in the root `.env` file (typically `lucaslorentz/caddy-docker-proxy:alpine`).
-- **Container Name**: `caddy-proxy`.
-- **Ports**: Exposes 80 and 443 on the host.
-- **Port mappings**:
-  - `80:80`
-  - `443:443/tcp`
-  - `443:443/udp`
-- **Network**: Connected to `docker_net` for service discovery.
-- **Volumes**:
-  - `/var/run/docker.sock:/var/run/docker.sock`: Allows Caddy to inspect running containers and their labels.
-  - `${BASE_STORAGE_DIR:-/blk}/caddy-proxy:/data/caddy`: Persists certificates, keys, and configuration data.
+- Image: `${CADDY_PROXY_IMAGE:-lucaslorentz/caddy-docker-proxy:alpine}`
+- Container name: `caddy-proxy`
+- Ports: `80:80`, `443:443/tcp`, `443:443/udp`
+- Volumes:
+  - `/var/run/docker.sock:/var/run/docker.sock`
+  - `${BASE_STORAGE_DIR:-/blk}/caddy-proxy:/data/caddy`
+- Network: `docker_net`
 
-### Environment Variables
+## Start
 
-Set in the root `.env` file:
+From the repository root:
 
-```env
-CADDY_IMAGE=lucaslorentz/caddy-docker-proxy:alpine
-BASE_STORAGE_DIR=/blk  # Host path for persistent data
+```sh
+docker compose -f Caddy-Proxy/docker-compose.yml up -d
 ```
 
-## How It Works
+## Notes
 
-Caddy automatically discovers services by reading Docker labels on containers. For example, a service might have:
-
-```yaml
-labels:
-  caddy: example.com
-  caddy.reverse_proxy: "{{upstreams 80}}"
-```
-
-This tells Caddy to route `https://example.com` to the container's port 80, obtaining and renewing TLS certificates automatically.
-
-## Usage
-
-1. Include `Caddy-Proxy/docker-compose.yml` in your `COMPOSE_FILE`.
-2. Ensure other services have appropriate Caddy labels in their compose files.
-3. Start Caddy:
-   ```sh
-   docker compose up -d caddy
-   ```
-4. Caddy will listen on ports 80/443 and proxy requests based on container labels.
-
-## Requirements
-
-- The `docker_net` network must exist (create with `docker network create docker_net`).
-- Services must be on the same network and have Caddy labels configured.
-- DNS records for domains should point to the host running Caddy.
-
-For more details, refer to the [Caddy Docker Proxy documentation](https://github.com/lucaslorentz/caddy-docker-proxy).
+- Services must define Caddy labels for automatic routing.
+- The proxy uses Docker labels to create routes and manage TLS certificates.

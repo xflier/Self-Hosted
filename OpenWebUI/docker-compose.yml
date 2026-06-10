@@ -4,14 +4,59 @@ services:
     container_name: openwebui
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/openwebui:/app/backend/data
+      - ${BASE_STORAGE_DIR:?Variable is not set}/caddy/data/caddy/pki/authorities/local/root.crt:/usr/local/share/ca-certificates/caddy_root.crt:ro
     environment:
+      - CORS_ALLOW_ORIGIN=${SERVER_PROTOCOL:?Variable is not set}://${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set}
       - WEBUI_SECRET_KEY=${PRIVATE_API_KEY:?Variable is not set}
+      - ENABLE_PERSISTENT_CONFIG=false
+
+      - WEBUI_AUTH=true
+      - ENABLE_SIGNUP=false # Disables native registrations, forcing Keycloak SSO
+      - ENABLE_LOGIN_FORM=false
+
+      - WEBUI_URL=${SERVER_PROTOCOL:?Variable is not set}://${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set}
+
+      # OAuth2 / OpenID Connect Settings
+      - ENABLE_OAUTH_SIGNUP=true
+      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
+      - OAUTH_PROVIDER_NAME=Keycloak
+      - OAUTH_CLIENT_ID=openwebui
+      - OAUTH_CLIENT_SECRET=${OPEN_WEBUI_OAUTH_CLIENT_SECRET:?Variable is not set}
+      - OAUTH_SCOPES=openid email profile acr
+
+      # The .well-known endpoint must be reachable by the backend container.
+      - OPENID_PROVIDER_URL=${SERVER_PROTOCOL:?Variable is not set}://${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set}/realms/home/.well-known/openid-configuration
+
+      # Redirect URI back to Open WebUI from the user's browser
+      - OPENID_REDIRECT_URI=${SERVER_PROTOCOL:?Variable is not set}://${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set}/oauth/oidc/callback
+
+      # Tell Open WebUI where to look for the roles array in Keycloak's token
+      - OAUTH_ROLES_CLAIM=roles
+
+      # Users must have this Keycloak role to be allowed to log in at all
+      - OAUTH_ALLOWED_ROLES=openwebui-user,openwebui-admin
+
+      # Users with this Keycloak role automatically become Open WebUI Administrators
+      - OAUTH_ADMIN_ROLES=openwebui-admin
+
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/caddy_root.crt
+      - REQUESTS_CA_BUNDLE=/usr/local/share/ca-certificates/caddy_root.crt
+      - HTTXP_CA_BUNDLE=/usr/local/share/ca-certificates/caddy_root.crt
+
+      - ENV=prod
+
+    # extra_hosts:
+    #  - "${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
+    #  - "${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
     restart: unless-stopped
     networks:
       - docker_net
-    labels:
-      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set}
-      caddy.reverse_proxy: "{{upstreams 8080}}"
+    
+    # The following labels are used by the Caddy Proxy to automatically configure reverse proxying to this service.
+    # not needed if Caddy is used as a standalone reverse proxy with a static Caddyfile configuration
+    # labels:
+    #   caddy: ${SERVER_PROTOCOL:?Variable is not set}://${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set}
+    #   caddy.reverse_proxy: "{{upstreams 8080}}"
 
 networks:
   docker_net:

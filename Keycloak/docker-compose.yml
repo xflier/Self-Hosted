@@ -1,0 +1,72 @@
+services:
+  keycloak:
+    image: ${KEYCLOAK_IMAGE:?Variable is not set}
+    container_name: keycloak
+    restart: unless-stopped
+    command:
+      - "start"
+      - "--spi-connections-http-client-default-disable-trust-manager=true"
+      - "--import-realm"
+
+    # Optional override entrypoint or realm import configuration.
+    # entrypoint: ["/bin/sh", "/opt/keycloak/bin/docker-entrypoint-override.sh"]
+    # volumes:
+    #   - "${BASE_STORAGE_DIR:?Variable is not set}/keycloak/docker-entrypoint-override.sh:/opt/keycloak/bin/docker-entrypoint-override.sh"
+    #   - "${BASE_STORAGE_DIR:?Variable is not set}/keycloak/ocis-realm.dist.json:/opt/keycloak/data/import-dist/ocis-realm.json"
+
+    environment:
+      # Hostname used by Keycloak to build public URLs.
+      KC_HOSTNAME: ${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set or empty}
+      KC_HOSTNAME_STRICT: "true"
+      # KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+
+      # Database connection settings.
+      KC_DB: postgres
+      KC_DB_URL: "jdbc:postgresql://postgres:5432/${KEYCLOAK_DB:?Variable is not set or empty}"
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER:?Variable is not set or empty}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?Variable is not set or empty}
+
+      # Initial admin user credentials for bootstrap.
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:?Variable is not set or empty}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Variable is not set or empty}
+
+      # HTTP and proxy settings.
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: true
+
+      # Optional settings you can enable as needed.
+      # OCIS_DOMAIN: ${OCIS_DOMAIN:-ocis.owncloud.test}
+      # KC_FEATURES: impersonation
+      # KC_HTTP_PORT: 8080
+      # KC_SPI_HOSTNAME_DEFAULT_FORWARDED: "true"
+
+    # extra_hosts:
+    #  - "${OCIS_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
+    #  - "${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
+    #  - "${OPEN_WEBUI_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
+
+    # The following labels are used by the Caddy Proxy to automatically configure reverse proxying to this service.
+    # not needed if Caddy is used as a standalone reverse proxy with a static Caddyfile configuration
+    # labels:
+    #   caddy: ${SERVER_PROTOCOL:?Variable is not set}://${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set or empty}
+    #   caddy.reverse_proxy: "{{upstreams 8080}}"
+      # caddy.reverse_proxy.header_up: '["Host {host}", "X-Forwarded-For {remote}", "X-Forwarded-Proto {scheme}", "X-Forwarded-Host {host}"]'
+      # Only needed for localhost-style domains that require extra_hosts.
+      # For real domains, the host machine IP already resolves correctly.
+    #   caddy.tls: "internal"
+
+    networks:
+      - docker_net
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    depends_on:
+      - postgres
+
+networks:
+  docker_net:
+    external: true

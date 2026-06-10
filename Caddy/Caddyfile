@@ -1,0 +1,66 @@
+ai.self.test {
+    tls internal
+    reverse_proxy openwebui:8080
+}
+
+keycloak.self.test {
+    tls internal
+    reverse_proxy keycloak:8080
+}
+
+ocis.self.test {
+    tls internal
+    reverse_proxy ocis:9200
+}
+
+onlyoffice.self.test {
+    tls internal
+    reverse_proxy onlyoffice:80
+}
+
+collabora.self.test {
+    tls internal
+    reverse_proxy collabora:9980
+}
+
+psono.test.localhost {
+    tls internal
+    reverse_proxy psono:80
+}
+
+vault.test.localhost {
+    tls internal
+    reverse_proxy vaultwarden:80
+}
+
+seafile.self.test {
+    tls internal
+
+    # Named matcher to detect WebSocket upgrade headers
+    @ws {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+
+    # 1. Handle socket.io traffic
+    handle_path /socket.io/* {
+        rewrite * /socket.io{uri}
+        reverse_proxy seadoc:80
+    }
+
+    # 2. Handle sdoc-server traffic
+    handle_path /sdoc-server/* {
+        rewrite * {uri}
+        reverse_proxy seadoc:80 
+    }
+
+    # 3. Route WebSockets matching the @ws criteria
+    reverse_proxy @ws seafile:80
+
+    # Specific tweaks just for WebDAV
+    route /seafdav* {
+        header +Custom-Webdav-Header "value"
+        reverse_proxy seafile:80
+    }
+    reverse_proxy seafile:80
+}

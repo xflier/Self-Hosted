@@ -24,7 +24,7 @@ services:
       - SEAFILE_LOG_TO_STDOUT=${SEAFILE_LOG_TO_STDOUT:-true}
       - ENABLE_SEADOC=${ENABLE_SEADOC:-false}
       - ENABLE_GO_FILESERVER=${ENABLE_GO_FILESERVER:-false}
-      # - SEADOC_SERVER_URL=${SERVER_PROTOCOL:?Variable is not set}://${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}/sdoc-server
+      - SEADOC_SERVER_URL=${SERVER_PROTOCOL:?Variable is not set}://${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}/sdoc-server
       # - ENABLE_SEAFDAV=${ENABLE_SEAFDAV:-false}
       # - SEAFDAV_WORKERS=${SEAFDAV_WORKERS:-3}
       - CACHE_PROVIDER=${CACHE_PROVIDER:-redis}
@@ -37,11 +37,15 @@ services:
       # - ENABLE_SEAFILE_AI=${ENABLE_SEAFILE_AI:-false}
       # - ENABLE_FACE_RECOGNITION=${ENABLE_FACE_RECOGNITION:-false}
       # - MD_FILE_COUNT_LIMIT=${MD_FILE_COUNT_LIMIT:-100000}
-    labels:
-      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}
-      caddy.reverse_proxy: "{{upstreams 80}}"
-      caddy.route_0: /seafdav*
-      caddy.route_0.reverse_proxy: "{{upstreams 80}}"
+    # labels:
+    #   caddy: ${SERVER_PROTOCOL:?Variable is not set}://${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}
+    #   caddy.reverse_proxy: "{{upstreams 80}}"
+    #   caddy.route_0: /seafdav*
+    #   caddy.route_0.reverse_proxy: "{{upstreams 80}}"
+    
+    # extra_hosts:
+      #  - "${ONLYOFFICE_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
+      #  - "${SEAFILE_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]

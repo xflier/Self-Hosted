@@ -1,3 +1,3 @@
-create user <psono user login in .env> with password '<psono user password in .env>';
-create database <psono db name in .env> owner <psono user login in .env>;
-GRANT ALL PRIVILEGES ON DATABASE <psono db name in .env> TO <psono user login in .env>;
+create user psono with password 'abc123abc123';
+create database psono_db owner psono;
+GRANT ALL PRIVILEGES ON DATABASE psono_db TO psono;

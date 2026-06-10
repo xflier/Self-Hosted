@@ -1,60 +1,32 @@
 # Psono Service
 
-This Docker Compose service runs Psono, a self-hosted password manager web application.
+This folder contains a Psono password manager deployment.
 
-## Service configuration
+## Prerequisites
 
-- **Service name**: `psono`
-- **Container name**: `psono`
-- **Image**: defined by `PSONO_IMAGE` in the root `.env` file
-- **Restart policy**: `unless-stopped`
-- **Network**: connected to the external `docker_net`
-- **Dependencies**: starts after `postgres`
+- Docker Engine and Docker Compose v2
+- `docker_net` external Docker network
+- Root `.env` with required variables
+- PostgreSQL and Redis available on the Docker network
 
-## Volumes
-
-The service mounts host files into the container for configuration:
-
-- `${BASE_STORAGE_DIR}/psono/config.json` → `/usr/share/nginx/html/config.json`
-- `${BASE_STORAGE_DIR}/psono/config.json` → `/usr/share/nginx/html/portal/config.json`
-- `${BASE_STORAGE_DIR}/psono/settings.yaml` → `/root/.psono_server/settings.yaml`
-
-This setup allows Psono to load UI and portal configuration from the shared host path.
-
-## Reverse proxy labels
-
-The service includes Caddy proxy labels for automatic routing:
-
-```yaml
-labels:
-  caddy: ${SERVER_PROTOCOL:?Variable is not set}://${PSONO_SERVER_HOSTNAME:?Variable is not set}
-  caddy.reverse_proxy: "{{upstreams 80}}"
-```
-
-This means a compatible Caddy proxy can route inbound traffic for `PSONO_SERVER_HOSTNAME` to the Psono container on port `80`.
-
-## Required environment variables
-
-Set the following values in the repository root `.env` file:
+## Required variables
 
 - `PSONO_IMAGE`
 - `PSONO_SERVER_HOSTNAME`
 - `SERVER_PROTOCOL`
 - `BASE_STORAGE_DIR`
 
-If the service configuration uses external environment management, ensure these variables are available to `docker compose`.
+## Service details
 
-## Startup
+- Container name: `psono`
+- Mounts:
+  - `${BASE_STORAGE_DIR}/psono/config.json`
+  - `${BASE_STORAGE_DIR}/psono/settings.yaml`
+- Depends on `postgres` and `redis`
+- No host port published by default
 
-From the repository root, run:
+## Start
 
 ```sh
-docker compose -f Psono/docker-compose.yml up -d
+docker compose up -d psono
 ```
-
-## Notes
-
-- The container does not publish a host port by default. Access should be through the Docker network and reverse proxy.
-- `postgres` is required and must be available on the shared `docker_net`.
-- `net.core.somaxconn` is reduced to `16` in the container via `sysctls`.
-- Uncomment or extend ports and environment settings in `docker-compose.yml` if you need direct host access or additional Psono options.

@@ -1,53 +1,26 @@
 # Redis Insight Service
 
-This service runs RedisInsight, a web-based management UI for Redis.
+This folder contains RedisInsight, a web-based GUI for inspecting Redis instances.
 
-## Service configuration
+## Prerequisites
 
-- **Service name**: `redisinsight`
-- **Container name**: `redisinsight`
-- **Image**: `redis/redisinsight:latest`
-- **Restart policy**: `no`
-- **Network**: attached to the external `docker_net`
-- **Port**:
-  - `5540:5540`
-- **Volume**:
-  - `/blk/redis/insight:/data`
-- **User**: `0:0`
+- Docker Engine and Docker Compose v2
+- `docker_net` external Docker network
+- Root `.env` with `REDIS_INSIGHT_IMAGE` and `BASE_STORAGE_DIR`
 
-## Environment variables
+## Service details
 
-The compose file includes:
+- Container name: `redisinsight`
+- Published host port: `5540`
+- Stores data in `${BASE_STORAGE_DIR}/redis/insight`
+- Runs as `${UID}:${GID}`
 
-- `RI_APP_PORT=5540`
-
-Optional variables you can uncomment or add:
-
-- `RI_ENCRYPTION_KEY=a_very_long_random_string_here`
-- `RI_STDOUT_LOGGER=true`
-
-## Usage
-
-From the repository root, start the service with:
+## Start
 
 ```sh
-docker compose -f Redis-Insight/docker-compose.yml up -d
+docker compose up -d redisinsight
 ```
 
-Then access RedisInsight in your browser at:
+## Access
 
-```text
-http://<host>:5540
-```
-
-## Notes
-
-- The service stores data under `/blk/redis/insight` on the host.
-- RedisInsight runs on port `5540` and connects to Redis instances from the UI.
-- Ensure the `docker_net` network exists before starting:
-
-```sh
-docker network create docker_net
-```
-
-- If you need to persist configuration or session state, keep the `/blk/redis/insight` volume mounted.
+Open `http://<host>:5540` in your browser.

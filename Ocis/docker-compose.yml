@@ -8,75 +8,114 @@ services:
       - /bin/sh
     command: ["-c", "ocis init || true; exec ocis server"]
     environment:
-      # INSECURE: needed if oCIS / Traefik is using self generated certificates
+
+      # Server / proxy settings
+      # true if caddy.tls: "internal" is used, false if real domains are used and TLS is terminated at the reverse proxy layer
       OCIS_INSECURE: "true"
-
       OCIS_URL: "${SERVER_PROTOCOL:?Variable is not set}://${OCIS_SERVER_HOSTNAME:?Variable is not set}"
-
-      # OCIS_LOG_LEVEL: error / info / ... / debug
-      OCIS_LOG_LEVEL: "info"
-      OCIS_LOG_COLOR: "${LOG_PRETTY:-false}"
-      OCIS_LOG_PRETTY: "${LOG_PRETTY:-false}"
       PROXY_TLS: "false"
 
-      # make the REVA gateway accessible to the app drivers
+      # Gateway addresses
       GATEWAY_GRPC_ADDR: 0.0.0.0:9142
+      GATEWAY_HTTP_ADDR: ocis:9143
 
-      # admin user password
-      IDM_ADMIN_PASSWORD: "${OCIS_ADMIN_PASSWORD:?Variable is not set}" # this overrides the admin password from the configuration file
-      # demo users
-      IDM_CREATE_DEMO_USERS: "false"
+      # Logging
+      OCIS_LOG_LEVEL: ${LOG_LEVEL:-info}
+      OCIS_LOG_COLOR: "${LOG_PRETTY:-false}"
+      OCIS_LOG_PRETTY: "${LOG_PRETTY:-false}"
 
-      # email server (if configured)
-      # NOTIFICATIONS_SMTP_HOST: "${SMTP_HOST}"
-      # NOTIFICATIONS_SMTP_PORT: "${SMTP_PORT}"
-      # NOTIFICATIONS_SMTP_SENDER: "${SMTP_SENDER:-oCIS notifications <notifications@${OCIS_DOMAIN:-ocis.owncloud.test}>}"
-      # NOTIFICATIONS_SMTP_USERNAME: "${SMTP_USERNAME}"
-      # NOTIFICATIONS_SMTP_INSECURE: "true"
+      # Authentication / security
+      OCIS_JWT_SECRET: "${JWT_PRIVATE_KEY:?Variable is not set or empty}"
+      # OCIS_MFA_ENABLED: "true"
+      # OCIS_ADMIN_USER_ID: ""
+      # IDM_ADMIN_PASSWORD: "${OCIS_ADMIN_PASSWORD:?Variable is not set}" # overrides config admin password
+      # IDM_CREATE_DEMO_USERS: "false"
+      # OCIS_PASSWORD_POLICY_BANNED_PASSWORDS_LIST: banned-password-list.txt
 
-      # make the registry available to the app provider containers
+      # Service registry / discovery
       MICRO_REGISTRY_ADDRESS: 127.0.0.1:9233
       NATS_NATS_HOST: 0.0.0.0
       NATS_NATS_PORT: 9233
 
-      OCIS_JWT_SECRET: "${JWT_PRIVATE_KEY}"
-
+      # App provider / CSP configuration
       PROXY_CSP_CONFIG_FILE_LOCATION: /etc/ocis/csp.yaml
-      # these three vars are needed to the csp config file to include the web office apps and the importer
-      # if use onlyoffice
-      ONLYOFFICE_DOMAIN: ${ONLYOFFICE_SERVER_HOSTNAME:-onlyoffice.test.localhost}
+      # Required by the CSP config to include the web office apps and importer when using OnlyOffice
+      ONLYOFFICE_DOMAIN: ${ONLYOFFICE_SERVER_HOSTNAME:?Variable is not set or empty}
+      COMPANION_DOMAIN: ${COMPANION_SERVER_HOSTNAME:-companion.self.test}
+      COLLABORA_DOMAIN: ${COLLABORA_SERVER_HOSTNAME:?Variable is not set or empty}
 
-      # placeholder for now
-      COMPANION_DOMAIN: ${COMPANION_SERVER_HOSTNAME:-companion.test.localhost}
-      COLLABORA_DOMAIN: ${COLLABORA_SERVER_HOSTNAME:-collabora.test.localhost}
+      # Identity provider / external auth
+      OCIS_EXCLUDE_RUN_SERVICES: idp
+      PROXY_AUTOPROVISION_ACCOUNTS: "true"
+      OCIS_OIDC_ISSUER: ${SERVER_PROTOCOL:?Variable is not set}://${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set or empty}/realms/home
+      PROXY_OIDC_REWRITE_WELLKNOWN: "true"
+      WEB_OIDC_CLIENT_ID: ocis
+      WEB_OIDC_SCOPE: "openid profile email acr"
+      KEYCLOAK_DOMAIN: ${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set or empty}
 
-      # enable to allow using the banned passwords list
-      # OCIS_PASSWORD_POLICY_BANNED_PASSWORDS_LIST: banned-password-list.txt
+      # Role and claim mapping
+      PROXY_USER_OIDC_CLAIM: preferred_username
+      PROXY_USER_CS3_CLAIM: username
+      PROXY_ROLE_ASSIGNMENT_DRIVER: oidc
+      GRAPH_ASSIGN_DEFAULT_USER_ROLE: "false"
+      GRAPH_USERNAME_MATCH: "none"
 
-      FRONTEND_APP_HANDLER_SECURE_VIEW_APP_ADDR: "com.owncloud.api.collaboration.CollaboraOnline"
-      GRAPH_AVAILABLE_ROLES: "b1e2218d-eef8-4d4c-b82d-0f1a1b48f3b5,a8d5fe5e-96e3-418d-825b-534dbdf22b99,fb6c3e19-e378-47e5-b277-9732f9de6e21,58c63c02-1d89-4572-916a-870abc5a1b7d,2d00ce52-1fc2-4dbc-8b95-a73b73395f5a,1c996275-f1c9-4e71-abdf-a42f6495e960,312c0871-5ef7-4b3a-85b6-0e4074c64049,aa97fe03-7980-45ac-9e50-b325749fd7e6"
+      WEB_ASSET_APPS_PATH: /var/lib/ocis/apps
+      OCIS_BASE_DATA_PATH: /var/lib/ocis
+
+      TRANSFER_SECRET: "${JWT_PRIVATE_KEY:?Variable is not set or empty}"
+
+      # Optional / advanced configuration
+      # FRONTEND_APP_HANDLER_SECURE_VIEW_APP_ADDR: "com.owncloud.api.collaboration.CollaboraOnline"
+      # GRAPH_AVAILABLE_ROLES: "b1e2218d-eef8-4d4c-b82d-0f1a1b48f3b5,a8d5fe5e-96e3-418d-825b-534dbdf22b99,fb6c3e19-e378-47e5-b277-9732f9de6e21,58c63c02-1d89-4572-916a-870abc5a1b7d,2d00ce52-1fc2-4dbc-8b95-a73b73395f5a,1c996275-f1c9-4e71-abdf-a42f6495e960,312c0871-5ef7-4b3a-85b6-0e4074c64049,aa97fe03-7980-45ac-9e50-b325749fd7e6"
 
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/config/app-registry.yaml:/etc/ocis/app-registry.yaml
       - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/config:/etc/ocis
       - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/data:/var/lib/ocis
+      # - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/data/config/apps.yaml:/var/lib/ocis/config/apps.yaml:ro
     logging:
       driver: "json-file"
       options:
         max-size: "200k"
         max-file: "5"
     
-    # make the host machine's gateway available to the container, so that the app provider containers can reach the oCIS server via the host's gateway IP address (which is what they see as the address of the oCIS server)
-    # it seems it is needed when using the host.docker.internal address in the app provider containers, otherwise they cannot reach the oCIS server (probably because of some DNS resolution issue), while with this extra_hosts entry, they can reach the oCIS server via the host's gateway IP address
-    # might be needed when using localhost domain names like ocis.test.localhost
+    # might be needed when using localhost domain names like ocis.self.test
     # comment them out when using real domain names
-    extra_hosts:
-      - "${OCIS_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
+    # extra_hosts:
+    #  - "${OCIS_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
+    #  - "${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set or empty}:host-gateway"
+   
     networks:
       - docker_net
-    labels:
-      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${OCIS_SERVER_HOSTNAME:?Variable is not set}
-      caddy.reverse_proxy: "{{upstreams 9200}}"
+
+    # The following labels are used by the Caddy Proxy to automatically configure reverse proxying to this service.
+    # not needed if Caddy is used as a standalone reverse proxy with a static Caddyfile configuration
+    # labels:
+    #   caddy: ${SERVER_PROTOCOL:?Variable is not set}://${OCIS_SERVER_HOSTNAME:?Variable is not set}
+    #   caddy.reverse_proxy: "{{upstreams 9200}}"
+      # only for localhost domain names, like collabora.self.test
+      # because they cannot be accessed by other containers without extra_hosts configuration. 
+      # real domain names resolve to the host machine's IP address, you can comment out the caddy.tls label.
+    #   caddy.tls: "internal"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      # unzip-init:
+      #   condition: service_completed_successfully
+      # photo-addon-init:
+      #   condition: service_completed_successfully
+      # progressbars-init:
+      #   condition: service_completed_successfully
+      # jsonviewer-init:
+      #   condition: service_completed_successfully
+      # externalsites-init:
+      #   condition: service_completed_successfully
+      # drawio-init:
+      #   condition: service_completed_successfully
 
   collaboration-oo:
     image: ${OCIS_IMAGE:?Variable is not set}
@@ -88,9 +127,8 @@ services:
         condition: service_started
       onlyoffice:
         condition: service_healthy
-    entrypoint:
-      - /bin/sh
-    command: ["-c", "ocis collaboration server"]
+    
+    command: ["collaboration", "server"]
 
     # it seems it is needed when using the localhost domain names, comment it out when using real domain names
     extra_hosts:
@@ -113,12 +151,81 @@ services:
       OCIS_JWT_SECRET: "${JWT_PRIVATE_KEY}"
       COLLABORATION_JWT_SECRET: "${JWT_PRIVATE_KEY}"
       COLLABORATION_WOPI_SECRET: "${JWT_PRIVATE_KEY}"
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/onlyoffice/config:/etc/ocis
     logging:
       driver: "json-file"
       options:
         max-size: "200k"
         max-file: "5"
     restart: unless-stopped
+
+  # web extensions - run once
+  unzip-init:
+    image: owncloud/web-extensions:unzip-latest
+    container_name: unzip-init
+    restart: "no"
+    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/data/apps:/apps
+    entrypoint:
+      - /bin/sh
+    command: ["-c", "cp -R /var/lib/nginx/html/unzip/ /apps"]
+
+  photo-addon-init:
+    image: owncloud/web-extensions:photo-addon-latest
+    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
+    container_name: photo-addon-init
+    restart: "no"
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/data/apps:/apps
+    entrypoint:
+      - /bin/sh
+    command: ["-c", "cp -R /var/lib/nginx/html/photo-addon/ /apps"]
+
+  progressbars-init:
+    image: owncloud/web-extensions:progress-bars-latest
+    container_name: progressbars-init
+    restart: "no"
+    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/data/apps:/apps
+    entrypoint:
+      - /bin/sh
+    command: ["-c", "cp -R /var/lib/nginx/html/progress-bars/ /apps"]
+
+  jsonviewer-init:
+    image: owncloud/web-extensions:json-viewer-latest
+    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
+    container_name: jsonviewer-init
+    restart: "no"
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/data/apps:/apps
+    entrypoint:
+      - /bin/sh
+    command: ["-c", "cp -R /var/lib/nginx/html/json-viewer/ /apps"]
+
+  externalsites-init:
+    image: owncloud/web-extensions:external-sites-latest
+    container_name: externalsites-init
+    restart: "no"
+    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/data/apps:/apps
+    entrypoint:
+      - /bin/sh
+    command: ["-c", "cp -R /var/lib/nginx/html/external-sites/ /apps"]
+
+  drawio-init:
+    image: owncloud/web-extensions:draw-io-latest
+    container_name: drawio-init
+    restart: "no" 
+    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/ocis/data/apps:/apps
+    entrypoint:
+      - /bin/sh
+    command: ["-c", "cp -R /var/lib/nginx/html/draw-io/ /apps"]
 
 networks:
   docker_net:
