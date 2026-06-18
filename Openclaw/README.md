@@ -19,18 +19,24 @@ This folder contains an Openclaw gateway deployment and a CLI helper container.
 - `OPENCLAW_GATEWAY_TOKEN`
 - `OPENCLAW_SERVER_HOSTNAME`
 - `OPENCLAW_GATEWAY_BIND`
-- `OPENCLAW_GATEWAY_PORT`
-- `OPENCLAW_BRIDGE_PORT`
 - `BASE_STORAGE_DIR`
 - `TIME_ZONE`
 - `UID`
 - `GID`
 
+## Volumes
+
+- `${BASE_STORAGE_DIR}/openclaw/home` → Openclaw state and configuration
+- `${BASE_STORAGE_DIR}/openclaw/runtime-deps` → plugin runtime dependencies
+- `${BASE_STORAGE_DIR}/openclaw/workspace` → shared Openclaw workspace
+- `${BASE_STORAGE_DIR}/openclaw/config` → Openclaw config directory
+
 ## Notes
 
 - The gateway is not published directly to the host by default.
-- `openclaw-cli` runs in the gateway network namespace.
-- The gateway is expected to be reverse proxied using Caddy labels.
+- `openclaw-cli` uses `network_mode: service:openclaw-gateway` and shares the gateway network namespace.
+- The gateway is intended to be reverse proxied through Caddy using the `caddy` labels.
+- The gateway listens internally on port `18789`.
 
 ## Start
 
