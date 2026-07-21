@@ -8,16 +8,18 @@ services:
       - HERMES_DASHBOARD=1
       - API_SERVER_ENABLED=true
       - API_SERVER_HOST=0.0.0.0
-      - HERMES_DASHBOARD_HOST=0.0.0.0
       - API_SERVER_KEY=${PRIVATE_API_KEY:?Variable is not set}
-      - HERMES_DASHBOARD_INSECURE=1
+      - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin
+      - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=your_secure_password
+      # - HERMES_DASHBOARD_HOST=0.0.0.0
+      # - HERMES_DASHBOARD_INSECURE=1
       # - API_SERVER_CORS_ORIGINS=*
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/hermes/agent1:/opt/data
     restart: unless-stopped
-    # ports:
+    ports:
     #   - "8642:8642"   # gateway API
-    #  - "9119:9119"   # dashboard (only reached when HERMES_DASHBOARD=1)
+      - "29119:9119"   # dashboard (only reached when HERMES_DASHBOARD=1)
     networks:
       - docker_net
     healthcheck:
@@ -35,16 +37,18 @@ services:
   instance-agent:
     <<: *common_settings
     container_name: instance-agent
-    # ports:
-    #   - "19119:9119"
+    ports:
+      - "19119:9119"
     environment:
       - HERMES_UID=10010
       - HERMES_DASHBOARD=1
       - API_SERVER_ENABLED=true
       - API_SERVER_HOST=0.0.0.0
       - API_SERVER_KEY=${PRIVATE_API_KEY:?Variable is not set}
-      - HERMES_DASHBOARD_HOST=0.0.0.0
-      - HERMES_DASHBOARD_INSECURE=1
+      - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin
+      - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=your_secure_password
+      # - HERMES_DASHBOARD_HOST=0.0.0.0
+      # - HERMES_DASHBOARD_INSECURE=1
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/hermes/instance:/opt/data
 
@@ -67,9 +71,9 @@ services:
       - ${BASE_STORAGE_DIR:?Variable is not set}/hermes/workspace:/workspace
     networks:
       - docker_net
-    labels:
-      caddy: ${SERVER_PROTOCOL:?Variable is not set}://${HERMES_WORKSPACE_SERVER_HOSTNAME:?Variable is not set}
-      caddy.reverse_proxy: "{{upstreams 3000}}"
+    # labels:
+    #  caddy: ${SERVER_PROTOCOL:?Variable is not set}://${HERMES_WORKSPACE_SERVER_HOSTNAME:?Variable is not set}
+    #  caddy.reverse_proxy: "{{upstreams 3000}}"
     depends_on:
       instance-agent:
         condition: service_healthy
