@@ -3,6 +3,47 @@ ai.self.test {
     reverse_proxy openwebui:8080
 }
 
+nextcloud.self.test {
+    tls internal
+
+    root * /var/www/html
+
+    # Block direct access to user data directory
+    # (NextCloud's .htaccess isn't read by Caddy)
+    handle /data/* {
+        respond 403
+    }
+
+    redir /.well-known/carddav /remote.php/dav/ 301
+    redir /.well-known/caldav /remote.php/dav/ 301
+
+    # Static files served directly from shared bind mount.
+    # PHP requests proxied to nextcloud:9000 via FastCGI.
+    php_fastcgi nextcloud:9000 {
+        root /var/www/html
+        env HTTPS on
+
+        read_timeout  300s
+        write_timeout 300s
+    }
+
+    file_server
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "no-referrer-when-downgrade"
+    }
+
+    encode gzip zstd
+
+    log {
+        output stdout
+        format console
+    }
+}
+
 keycloak.self.test {
     tls internal
     reverse_proxy keycloak:8080
@@ -15,12 +56,18 @@ ocis.self.test {
 
 onlyoffice.self.test {
     tls internal
-    reverse_proxy onlyoffice:80
+    reverse_proxy onlyoffice:80 {
+        header_up Host {http.request.host}
+        header_up X-Forwarded-Proto https
+    }
 }
 
 collabora.self.test {
     tls internal
-    reverse_proxy collabora:9980
+    reverse_proxy collabora:9980 {
+        header_up Host {http.request.host}
+        header_up X-Forwarded-Proto https
+    }
 }
 
 psono.test.localhost {

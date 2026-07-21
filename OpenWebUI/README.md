@@ -24,7 +24,10 @@ Open WebUI provides a self-hosted web interface for AI and LLM model interaction
 - Container name: `openwebui`
 - Uses Keycloak OpenID Connect for authentication
 - Data persisted in `${BASE_STORAGE_DIR}/openwebui`
-- Uses local Caddy certificate trust bundle mounted from `${BASE_STORAGE_DIR}`
+- Mounts the local Caddy certificate trust bundle (`SSL_CERT_FILE`,
+  `REQUESTS_CA_BUNDLE`) so Python requests trust Caddy's self-signed internal CA.
+  **In production** with real CA-signed certificates, these environment variables
+  can be removed.
 
 ## Start
 

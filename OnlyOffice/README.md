@@ -41,3 +41,6 @@ docker compose up -d onlyoffice
 
 - OnlyOffice is typically proxied through Caddy or a reverse proxy.
 - Verify the database and RabbitMQ credentials before starting.
+- The compose file uses `caddy.tls` labels with `internal` for local `.self.test`
+  domains. **In production** with real domains, remove `internal` so Caddy
+  obtains Let's Encrypt certificates automatically.

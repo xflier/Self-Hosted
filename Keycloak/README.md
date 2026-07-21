@@ -23,6 +23,11 @@ This folder contains a Keycloak deployment for OpenID Connect authentication.
 ## Service details
 
 - Uses the Keycloak Docker image and starts with `start --spi-connections-http-client-default-disable-trust-manager=true --import-realm`
+- The `disable-trust-manager` flag is required for local setups where Caddy uses
+  `tls internal` (self-signed) — it disables SSL certificate validation for
+  outbound HTTP connections from Keycloak.
+  **In production** with real domain certificates, remove this flag so proper
+  certificate validation is enforced.
 - Connects to PostgreSQL via `KC_DB_URL`
 - Uses `KC_PROXY_HEADERS=xforwarded`
 - Exposes no host HTTP port by default; access is expected through a reverse proxy
@@ -35,4 +40,7 @@ docker compose up -d keycloak
 
 ## Import realm
 
-Use the `realm/ocis-realm.json` definition to configure oCIS integration.
+The Keycloak realm configuration was previously defined in `realm/ocis-realm.json`,
+which has been removed. If you need a realm definition for oCIS integration, export it
+from an existing Keycloak instance or configure the realm manually through the
+Keycloak admin console.

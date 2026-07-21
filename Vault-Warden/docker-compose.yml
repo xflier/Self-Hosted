@@ -2,19 +2,48 @@ services:
   vaultwarden:
     image: ${VAULT_WARDEN_IMAGE:?Variable is not set}
     container_name: vaultwarden
-    user: ${UID:?Variable is not set}:${GID:?Variable is not set}
+    # user: ${UID:?Variable is not set}:${GID:?Variable is not set}
     restart: unless-stopped
     environment:
-      # DOMAIN: ${SERVER_PROTOCOL:?Variable is not set}://${VAULT_WARDEN_SERVER_HOSTNAME:?Variable is not set}
-      DATABASE_URL: "mysql://${VAULT_DB_USER:?Variable is not set}:${VAULT_DB_PASSWORD:?Variable is not set}@mariadb/${VAULT_DB:?Variable is not set}"
-      SIGNUPS_ALLOWED: "true" # Deactivate this with "false" after you have created your account so that no strangers can register
+      - DOMAIN=${SERVER_PROTOCOL:?Variable is not set}://${VAULT_WARDEN_SERVER_HOSTNAME:?Variable is not set}
+      - DATABASE_URL=mysql://${VAULT_DB_USER:?Variable is not set}:${VAULT_DB_PASSWORD:?Variable is not set}@mariadb/${VAULT_DB:?Variable is not set}
+      - SIGNUPS_ALLOWED=false # enable it if needed
+      - INVITATIONS_ALLOWED=false # enable it if needed
+      - SSO_ENABLED=true                    # 1. Activate SSO
+      - SSO_ONLY=true                       # 2. DISABLE email+Master password authentication
+      - SSO_ALLOW_UNKNOWN_EMAIL_VERIFICATION=false # Recommended to keep false for security
+      - SSO_SIGNUPS_MATCH_EMAIL=false        # Allow existing users (invited) to link their account
+      # 3. Keycloak realm URL (without /.well-known)
+      - SSO_AUTHORITY=${SERVER_PROTOCOL:?Variable is not set}://${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set}/realms/home
+      - SSO_SCOPES=openid profile email offline_access # 4. Request offline_access for refresh tokens
+      - SSO_CLIENT_ID=vaultwarden           # 5. Client ID you'll create in Keycloak
+      - SSO_CLIENT_SECRET=${KEYCLOAK_VAULT_CLIENT_KEY:?Variable is not set} # 6. Client Secret from Keycloak
+      - SSO_ROLES_ENABLED=true
+      # This is a safety net: if no role is found, login fails
+      - SSO_ROLES_DEFAULT_TO_USER=false
+      # Define the exact path in the token where Keycloak will place the role list.
+      # - SSO_ROLES_TOKEN_PATH=/resource_access/vaultwarden/roles
+      
+      # --- Additional (Optional) ---
+      - SSO_PKCE=true                    # PKCE is enabled by default (recommended)
+      - SSO_AUTH_ONLY_NOT_SESSION=true  # Let SSO manage session lifecycle (with refresh token)
+      - SSL_CERT_FILE=/etc/ssl/certs/caddy_root.crt
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/caddy_root.crt
+      # - LOG_LEVEL=debug                  # Enable for troubleshooting SSO
+    # extra_hosts:
+    #  - "${VAULT_WARDEN_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
+    #  - "${KEYCLOAK_SERVER_HOSTNAME:?Variable is not set}:host-gateway"
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/vault_warden:/data # the path before the : can be changed
+      # - /etc/ssl/certs/ca-bundle.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      - ${BASE_STORAGE_DIR:?Variable is not set}/caddy/data/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/caddy_root.crt:ro
     # ports:
     # - 11001:80
     depends_on:
       mariadb:
         condition: service_healthy
+      keycloak:
+        condition: service_started
     # The following labels are used by the Caddy Proxy to automatically configure reverse proxying to this service.
     # not needed if Caddy is used as a standalone reverse proxy with a static Caddyfile configuration
     # labels:

@@ -30,6 +30,9 @@ This folder contains a Docker Compose deployment for Hermes agent instances and 
 - `hermes-workspace` connects to `instance-agent` and provides the web UI.
 - No host ports are published by default; external access is expected through the reverse proxy.
 - `hermes-workspace` exposes its hostname via Caddy labels.
+- `HERMES_DASHBOARD_INSECURE=1` is set to allow HTTP connections behind the
+  reverse proxy. **In production** with proper TLS termination, this can be
+  removed if all traffic uses HTTPS.
 
 ## Start
 

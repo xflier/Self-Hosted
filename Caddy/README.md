@@ -47,3 +47,12 @@ docker compose -f Caddy/docker-compose.yml up -d
 - The `Dockerfile` builds a custom Caddy binary with the `caddy-security` plugin.
 - Network aliases are configured for Keycloak, OpenWebUI, oCIS, OnlyOffice, Collabora, and Seafile hostnames.
 - Place site content and Caddy configuration under the mounted `caddy` directories in the host storage path.
+
+### TLS in local vs production
+
+The [Caddyfile](Caddyfile) uses `tls internal` for all `.test.localhost` and `.self.test`
+domains, which generates self-signed certificates. This is for local development only.
+
+**In production** with real domains, remove the `tls internal` lines. Caddy will
+automatically obtain and renew trusted Let's Encrypt certificates for any domain
+it serves.

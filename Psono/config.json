@@ -10,6 +10,11 @@
   "disable_download_bar": false,
   "remember_me_default": false,
   "trust_device_default": false,
-  "authentication_methods": ["AUTHKEY", "LDAP"],
-  "saml_provider": []
+  "authentication_methods": ["OIDC"],
+  "auto_login": true,
+  "oidc_provider": [{
+    "title": "OIDC Login",
+    "provider_id": 1,
+    "button_name": "Login "
+  }]
 }

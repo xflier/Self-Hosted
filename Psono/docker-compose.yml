@@ -1,20 +1,21 @@
 services:
   psono:
-    image: ${PSONO_IMAGE:?Variable is not net}
+    image: ${PSONO_IMAGE:?Variable is not set}
     container_name: psono
     restart: unless-stopped
     sysctls:
       # net.core.somaxconn: '65535'
       net.core.somaxconn: '16'
-    # ports:
-    #  - "28080:80"
-    # environment:
-    #   - PSONO_ALLOW_EXPORT="True"
-    #   - PSONO_ALLOW_IMPORT="True"
     volumes:
-      - ${BASE_STORAGE_DIR:?Variable is not net}/psono/config.json:/usr/share/nginx/html/config.json
-      - ${BASE_STORAGE_DIR:?Variable is not net}/psono/config.json:/usr/share/nginx/html/portal/config.json
-      - ${BASE_STORAGE_DIR:?Variable is not net}/psono/settings.yaml:/root/.psono_server/settings.yaml
+      - ${BASE_STORAGE_DIR:?Variable is not set}/psono/config.json:/usr/share/nginx/html/config.json
+      - ${BASE_STORAGE_DIR:?Variable is not set}/psono/config.json:/usr/share/nginx/html/portal/config.json
+      - ${BASE_STORAGE_DIR:?Variable is not set}/psono/settings.yaml:/root/.psono_server/settings.yaml
+      - ${BASE_STORAGE_DIR:?Variable is not set}/psono/entrypoint.sh:/entrypoint.sh:ro
+      - ${BASE_STORAGE_DIR:?Variable is not set}/caddy/data/caddy/pki/authorities/local/root.crt:/usr/local/share/ca-certificates/caddy_root.crt:ro
+    command: sh /entrypoint.sh
+    environment:
+      - REQUESTS_CA_BUNDLE=/combined-ca.crt
+
     depends_on:
       - postgres
       - redis
@@ -24,7 +25,7 @@ services:
     # The following labels are used by the Caddy Proxy to automatically configure reverse proxying to this service.
     # not needed if Caddy is used as a standalone reverse proxy with a static Caddyfile configuration
     # labels:
-    #  caddy: ${SERVER_PROTOCOL:?Variable is not net}://${PSONO_SERVER_HOSTNAME:?Variable is not net}
+    #  caddy: ${SERVER_PROTOCOL:?Variable is not set}://${PSONO_SERVER_HOSTNAME:?Variable is not set}
     #  caddy.reverse_proxy: "{{upstreams 80}}"
 networks:
   docker_net:

@@ -1,2 +1,11 @@
 .env
 README-revisions.txt
+.settings.yaml
+
+.claude
+
+# Psono backend settings — contains generated crypto keys and credentials
+Psono/settings.yaml
+
+# Seafile Seahub settings — contains Django SECRET_KEY and JWT secrets
+Seafile/seahub_settings.py

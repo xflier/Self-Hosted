@@ -16,6 +16,7 @@ services:
       - ${BASE_STORAGE_DIR:?-Variable is not set or empty}/caddy/etc:/etc/caddy
       - ${BASE_STORAGE_DIR:?-Variable is not set or empty}/caddy/site:/srv
       - ${BASE_STORAGE_DIR:?-Variable is not set or empty}/caddy/config:/config
+      - ${BASE_STORAGE_DIR:?-Variable is not set or empty}/nextcloud/html:/var/www/html
     networks:
       docker_net:
         aliases:
@@ -25,7 +26,10 @@ services:
           - ${ONLYOFFICE_SERVER_HOSTNAME:?Variable is not set or empty}
           - ${COLLABORA_SERVER_HOSTNAME:?Variable is not set or empty}
           - ${SEAFILE_SERVER_HOSTNAME:?Variable is not set or empty}
+          - ${NEXTCLOUD_SERVER_HOSTNAME:?Variable is not set or empty}
+          - ${VAULT_WARDEN_SERVER_HOSTNAME:?Variable is not set or empty}
+          - ${PSONO_SERVER_HOSTNAME:?Variable is not set or empty}
 
-networks:
+networks:  
   docker_net:
     external: true

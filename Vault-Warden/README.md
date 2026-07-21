@@ -25,6 +25,10 @@ This folder contains Vault-Warden, a lightweight Bitwarden-compatible password m
 - Connects to MariaDB via `DATABASE_URL`
 - `SIGNUPS_ALLOWED=true` by default
 - No host port published by default
+- Mounts Caddy's internal root CA (`SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`) so the
+  Bitwarden API calls trust the reverse proxy's self-signed certificate.
+  **In production** with real CA-signed certificates, these environment variables
+  can be removed.
 
 ## Start
 

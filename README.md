@@ -34,7 +34,11 @@ This repository contains a collection of self-hosted services orchestrated with 
 docker network create docker_net
 ```
 
-2. Create or update the root `.env` file with required variables.
+2. Create the root `.env` file from the template:
+   ```sh
+   cp .env.example .env
+   ```
+   Then edit `.env` and set the required variables for your environment.
 
 3. Start services from the repository root, for example:
    ```sh
@@ -60,3 +64,19 @@ Important values include:
 - Most services use the external Docker network `docker_net` for inter-service communication.
 - Several services are expected to be reverse proxied rather than exposed directly on host ports.
 - Check each folder's `README.md` for service-specific requirements and startup commands.
+
+### Local vs production SSL/TLS
+
+This project uses `.test.localhost` and `.self.test` domains for local development.
+Caddy is configured with `tls internal` (self-signed certificates), and several
+services disable TLS verification to work with this setup.
+
+**In production** with real domains and proper CA-signed certificates:
+- Remove `tls internal` from Caddyfile lines — Caddy will automatically obtain
+  Let's Encrypt certificates for real domains.
+- Remove or set to `false` the `INSECURE`, `NO_TLS`, and `disable-trust-manager`
+  flags in individual service compose files.
+- The CA bundle workarounds (`REQUESTS_CA_BUNDLE`, `SSL_CERT_FILE`) are not
+  needed with publicly trusted certificates.
+
+See each service README for details.

@@ -46,3 +46,4 @@ docker compose up -d seafile
 ## Notes
 
 - Configure Seafile integration options in `seahub_settings.py` for OnlyOffice or SeaDoc.
+  A template is available at `seahub_settings.py.example` — copy and edit it as needed.

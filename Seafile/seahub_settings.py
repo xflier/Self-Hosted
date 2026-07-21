@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-SECRET_KEY = "ds=rc5n%6p56j#=#8-v9g)0!r1hqh5d-4fd*uj09tdlhm*xvg8"
+SECRET_KEY = "replace-with-your-generated-secret-key"
 
 TIME_ZONE = 'America/New_York'
 
@@ -10,5 +10,5 @@ ONLYOFFICE_INTERNAL_URL = 'http://onlyoffice/'
 ONLYOFFICE_APIJS_URL = 'https://onlyoffice.self.test/web-apps/apps/api/documents/api.js'
 ONLYOFFICE_FILE_EXTENSION = ('doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'fodt', 'odp', 'fodp', 'ods', 'fods', 'csv', 'ppsx', 'pps')
 ONLYOFFICE_EDIT_FILE_EXTENSION = ('docx', 'pptx', 'xlsx')
-ONLYOFFICE_JWT_SECRET = 'jwt_private_key_replace_it_in_production'
+ONLYOFFICE_JWT_SECRET = 'replace-with-your-jwt-secret'
 OFFICE_PREVIEW_MAX_SIZE = 30 * 1024 * 1024

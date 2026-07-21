@@ -2,7 +2,6 @@ services:
   postgres:
     image: ${POSTGRES_IMAGE:?Variable is not set}
     container_name: postgres
-    user: ${UID:-0}:${GID:-0}
     restart: unless-stopped
     shm_size: 128mb
     # ports:
@@ -13,11 +12,13 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:?Variable is not set}
     volumes:
       - ${BASE_STORAGE_DIR:?Variable is not set}/postgres:/var/lib/postgresql
+      # - ./NextCloud/init.sql:/docker-entrypoint-initdb.d/nextcloud.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?Variable is not set} -d ${POSTGRES_DB:?Variable is not set} -h localhost -p 5432"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
+      interval: 600s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
     logging:
       driver: "json-file"
       options:

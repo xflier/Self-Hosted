@@ -37,6 +37,9 @@ This folder contains an Openclaw gateway deployment and a CLI helper container.
 - `openclaw-cli` uses `network_mode: service:openclaw-gateway` and shares the gateway network namespace.
 - The gateway is intended to be reverse proxied through Caddy using the `caddy` labels.
 - The gateway listens internally on port `18789`.
+- `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=true` allows unencrypted WebSocket
+  connections behind the reverse proxy. **In production** with HTTPS, this
+  should be set to `false` or removed.
 
 ## Start
 

@@ -21,9 +21,9 @@ services:
           "--mariadbupgrade",
           "--innodb_initialized",
         ]
-      interval: 20s
+      interval: 600s
       start_period: 30s
-      timeout: 5s
+      timeout: 3s
       retries: 10
 
 networks:

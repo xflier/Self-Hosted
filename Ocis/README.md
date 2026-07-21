@@ -27,7 +27,10 @@ This folder contains the oCIS platform deployment and its collaboration integrat
 
 ## Notes
 
-- `ocis` runs with `OCIS_INSECURE=true` and `PROXY_TLS=false` because TLS is handled by the reverse proxy.
+- `ocis` runs with `OCIS_INSECURE=true` and `PROXY_TLS=false` because TLS is
+  terminated at the reverse proxy, which uses `tls internal` (self-signed CA).
+  **In production** with real domains and trusted certificates, set both to
+  `false` or remove them.
 - `collaboration-oo` uses OnlyOffice values and internal OCIS URLs.
 - The init containers populate web extensions into `${BASE_STORAGE_DIR}/ocis/data/apps`.
 

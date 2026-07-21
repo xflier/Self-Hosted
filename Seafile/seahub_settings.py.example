@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+# =============================================================================
+# Seafile Seahub Settings — Template / Example File
+# =============================================================================
+# Copy this file to `seahub_settings.py` and replace the placeholder values
+# with your actual configuration.
+# =============================================================================
+
+# Generate a unique secret key for your installation:
+#   python -c "import secrets; print(secrets.token_hex(32))"
+SECRET_KEY = "replace-with-your-generated-secret-key"
+
+TIME_ZONE = 'America/New_York'
+
+ENABLE_ONLYOFFICE = True
+VERIFY_ONLYOFFICE_CERTIFICATE = False
+ONLYOFFICE_FORCE_SAVE = True
+ONLYOFFICE_INTERNAL_URL = 'http://onlyoffice/'
+ONLYOFFICE_APIJS_URL = 'https://onlyoffice.yourdomain.com/web-apps/apps/api/documents/api.js'
+ONLYOFFICE_FILE_EXTENSION = ('doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'fodt', 'odp', 'fodp', 'ods', 'fods', 'csv', 'ppsx', 'pps')
+ONLYOFFICE_EDIT_FILE_EXTENSION = ('docx', 'pptx', 'xlsx')
+ONLYOFFICE_JWT_SECRET = 'replace-with-your-jwt-secret'
+OFFICE_PREVIEW_MAX_SIZE = 30 * 1024 * 1024

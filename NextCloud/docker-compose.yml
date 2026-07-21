@@ -1,0 +1,47 @@
+services:
+  nextcloud:
+    image: ${NEXTCLOUD_IMAGE:?Variable is not set}
+    container_name: nextcloud
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/nextcloud/html:/var/www/html
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST:?Variable is not set}
+      - POSTGRES_DB=${NEXTCLOUD_DB:?Variable is not set}
+      - POSTGRES_USER=${NEXTCLOUD_DB_USER:?Variable is not set}
+      - POSTGRES_PASSWORD=${NEXTCLOUD_DB_PASSWORD:?Variable is not set}
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER:?Variable is not set}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD:?Variable is not set}
+      # - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_SERVER_HOSTNAME:?Variable is not set}
+      - NEXTCLOUD_TRUSTED_DOMAINS=localhost,${DOCKER_NETWORK_SUBNET:?Variable is not set}
+      - OVERWRITEHOST=${NEXTCLOUD_SERVER_HOSTNAME:?Variable is not set}
+      - OVERWRITEPROTOCOL=https
+      - OVERWRITECLIURL=${SERVER_PROTOCOL:-https}://${NEXTCLOUD_SERVER_HOSTNAME:?Variable is not set}
+      - NEXTCLOUD_DATA_DIR=/var/www/html/data
+      - REDIS_HOST=${REDIS_HOST:?Variable is not set}
+      - REDIS_HOST_PORT=${REDIS_PORT:-6379}
+      - REDIS_HOST_PASSWORD=${REDIS_PASSWORD:?Variable is not set}
+      - TZ=${TIME_ZONE:?Variable is not set}
+    networks:
+      - docker_net
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+
+  nextcloud-cron:
+    image: ${NEXTCLOUD_IMAGE:?Variable is not set}
+    container_name: nextcloud-cron
+    user: 82:82  # www-data user and group
+    restart: unless-stopped
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/nextcloud/html:/var/www/html  # Must share the exact same code/data volume
+    entrypoint: |
+      /bin/sh -c 'while true; do php -f /var/www/html/cron.php; sleep 1800; done'
+    networks:
+      - docker_net
+    depends_on:
+      - nextcloud
+
+networks:
+  docker_net:
+    external: true
