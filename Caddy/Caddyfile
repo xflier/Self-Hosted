@@ -80,6 +80,11 @@ vault.test.localhost {
     reverse_proxy vaultwarden:80
 }
 
+proxy.test.localhost {
+    tls internal
+    reverse_proxy nim-proxy:15800
+}
+
 seafile.self.test {
     tls internal
 

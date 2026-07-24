@@ -1,0 +1,24 @@
+services:
+  nim-proxy:
+    image: ${NIM_PROXY_IMAGE:?Variable is not set}
+    container_name: nim-proxy
+    user: ${UID:?Varirable is not set}:${GID:?Variable is not set}
+    restart: unless-stopped
+    # ports:
+    #  - 15800:15800
+    environment:
+      - DATA_DIR=data
+      - TRUST_PROXY=true
+      - PORT=15800
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ${BASE_STORAGE_DIR:?Variable is not set}/nim-proxy:/data
+    networks:
+      - docker_net
+
+networks:
+  docker_net:
+    external: true
