@@ -5,6 +5,7 @@ services:
     container_name: hermes-agent
     command: gateway run
     environment:
+      - HERMES_UID=${UID:?Variable is not set}
       - HERMES_DASHBOARD=1
       - API_SERVER_ENABLED=true
       - API_SERVER_HOST=0.0.0.0
@@ -56,6 +57,8 @@ services:
     image: ${HERMES_WORKSPACE_IMAGE:?Variable is not set}
     container_name: hermes-workspace
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     environment:
       - HERMES_HOME=/home/workspace/.hermes
       - HERMES_WORKSPACE_DIR=/workspace
